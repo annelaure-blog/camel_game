@@ -1,0 +1,66 @@
+{
+  "palm_tree": {
+    "label": "palm tree",
+    "width": 100,
+    "height": 450,
+    "color": "white",
+    "border": "2px solid black"
+  },
+  "carpet": {
+    "label": "carpet",
+    "width": 320,
+    "height": 100,
+    "color": "white",
+    "border": "2px solid black"
+  },
+  "bedouins": {
+    "label": "bedouins",
+    "width": 280,
+    "height": 70,
+    "color": "#f4e3c2",
+    "border": "2px solid black"
+  },
+  "camel": {
+    "label": "camel",
+    "width": 200,
+    "height": 80,
+    "color": "#e2b980",
+    "border": "2px solid black"
+  },
+  "pond": {
+    "label": "pond",
+    "width": 240,
+    "height": 70,
+    "color": "#87ceeb",
+    "border": "2px solid black"
+  },
+  "bucket": {
+    "label": "bucket",
+    "width": 24,
+    "height": 36,
+    "color": "white",
+    "border": "2px solid black"
+  },
+  "dates": {
+    "label": "dates",
+    "width": 60,
+    "height": 30,
+    "color": "#8b4513",
+    "textColor": "white",
+    "border": "2px solid black"
+  },
+  "me": {
+    "label": "ME",
+    "width": 40,
+    "height": 70,
+    "color": "black",
+    "textColor": "white",
+    "border": "2px solid black"
+  },
+  "dunes": {
+    "label": "dunes",
+    "width": 0,
+    "height": 0,
+    "color": "transparent",
+    "textColor": "rgba(0,0,0,0.4)"
+  }
