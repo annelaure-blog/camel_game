@@ -1,5 +1,5 @@
 import { gameState } from "../main.js";
-import { handleInteraction } from "../interactions/desertActions.js";
+import { handleInteraction } from "../interactions/desertactions.js";
 
 export function loadDesertScene(dialogue) {
   const scene = document.getElementById("scene");
