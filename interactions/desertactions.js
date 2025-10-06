@@ -5,7 +5,7 @@ export function handleInteraction(target) {
 
   if (verb === "shake" && target === "palm tree") {
     dropDates();
-  } else if (verb === "pickup" && target === "bucket") {
+  } else if (verb === "pick up" && target === "bucket") {
     pickUp("bucket");
   } else if (verb === "use" && target === "pond") {
     useBucketOnPond();
@@ -23,7 +23,7 @@ function dropDates() {
   scene.appendChild(dates);
 
   dates.onclick = () => {
-    if (gameState.selectedVerb === "pickup") {
+    if (gameState.selectedVerb === "pick up") {
       dates.remove();
       gameState.inventory.push("dates");
       updateInventoryDisplay();
