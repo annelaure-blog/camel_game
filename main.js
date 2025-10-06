@@ -1,4 +1,4 @@
-import { loadDesertScene } from "./scenes/desertScene.js";
+import { loadDesertScene } from "./scenes/desertscene.js";
 import dialogues from "./data/dialogues.json" assert { type: "json" };
 
 export const gameState = {
