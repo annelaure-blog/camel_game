@@ -19,7 +19,7 @@ export function loadDesertScene(dialogue) {
     const div = document.createElement("div");
     div.className = "label";
     div.textContent = obj.name;
-    div.style = obj.style;
+    div.style.cssText = obj.style;
     div.onclick = () => handleInteraction(obj.name);
     scene.appendChild(div);
   });

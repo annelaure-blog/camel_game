@@ -1,7 +1,7 @@
 import { loadDesertScene } from "./scenes/desertscene.js";
 
 // JSON import via fetch (works on GitHub Pages)
-fetch("./data/dialogues.json")
+fetch("./data/dialogue.json")
   .then(response => response.json())
   .then(dialogues => {
     initGame(dialogues.desert);
