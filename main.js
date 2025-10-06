@@ -1,5 +1,11 @@
 import { loadDesertScene } from "./scenes/desertscene.js";
-import dialogues from "./data/dialogues.json" assert { type: "json" };
+
+// JSON import via fetch (works on GitHub Pages)
+fetch("./data/dialogues.json")
+  .then(response => response.json())
+  .then(dialogues => {
+    initGame(dialogues.desert);
+  });
 
 export const gameState = {
   inventory: [],
@@ -39,7 +45,7 @@ function setupVerbs() {
   });
 }
 
-window.onload = () => {
+function initGame(dialogues) {
   setupVerbs();
-  loadDesertScene(dialogues.desert);
-};
+  loadDesertScene(dialogues);
+}
