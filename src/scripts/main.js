@@ -36,6 +36,11 @@ let selectedVerb = null;
 const verbs = document.querySelectorAll('.verb');
 const labels = document.querySelectorAll('.label');
 
+const clearSelectedVerb = () => {
+  selectedVerb = null;
+  verbs.forEach((item) => item.classList.remove('active'));
+};
+
 const context = {
   inventory,
   ui: dialogueUI,
@@ -56,7 +61,10 @@ const handleInteraction = (verb, target) => {
   if (!verb) {
     return;
   }
-  runInteraction({ verb, target, context });
+  const wasHandled = runInteraction({ verb, target, context });
+  if (wasHandled) {
+    clearSelectedVerb();
+  }
 };
 
 const worldEvents = new WorldEvents({

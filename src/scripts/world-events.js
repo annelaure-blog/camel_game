@@ -12,11 +12,16 @@ export class WorldEvents {
     this.onInteraction = onInteraction;
     this.getSelectedVerb = getSelectedVerb;
     this.gaveWaterFirst = false;
+    this.receivedDates = false;
     this.datesElement = null;
   }
 
   hasGivenWater() {
     return this.gaveWaterFirst;
+  }
+
+  hasReceivedDates() {
+    return this.receivedDates;
   }
 
   hasDatesOnGround() {
@@ -25,6 +30,10 @@ export class WorldEvents {
 
   markWaterDelivered() {
     this.gaveWaterFirst = true;
+  }
+
+  markDatesDelivered() {
+    this.receivedDates = true;
   }
 
   shakePalmTree() {
