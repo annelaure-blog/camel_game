@@ -25,7 +25,7 @@ const sceneLayout = {
       layer: 4,
     },
     carpet: {
-      position: { default: { x: 0.25, y: 0.45 } },
+      position: { default: { x: 0.18, y: 0.52 } },
       size: {
         width: '350px',
         height: '250px',
@@ -43,7 +43,7 @@ const sceneLayout = {
       layer: 2,
     },
     camel: {
-      position: { default: { x: 0.60, y: 0.42 } },
+      position: { default: { x: 0.63, y: 0.39 } },
       size: {
         width: '150px',
         height: '100px',
