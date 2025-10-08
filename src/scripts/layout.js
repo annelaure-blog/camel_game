@@ -21,8 +21,8 @@ const sceneLayout = {
         mobile: { x: 0.12, y: 0.3 },
       },
       size: {
-        width: { default: 0.12, mobile: 0.16 },
-        height: { default: 0.6, mobile: 0.58 },
+        width: '132px',
+        height: '372px',
       },
       fontScale: { default: 2.2, mobile: 1.9 },
       layer: 4,
@@ -30,8 +30,8 @@ const sceneLayout = {
     carpet: {
       position: { default: { x: 0.33, y: 0.76 }, mobile: { x: 0.35, y: 0.78 } },
       size: {
-        width: { default: 0.32, mobile: 0.4 },
-        height: { default: 0.16, mobile: 0.18 },
+        width: '352px',
+        height: '99px',
       },
       fontScale: { default: 1.6, mobile: 1.4 },
       layer: 1,
@@ -39,22 +39,26 @@ const sceneLayout = {
     bedouins: {
       position: { default: { x: 0.32, y: 0.6 }, mobile: { x: 0.35, y: 0.62 } },
       size: {
-        width: { default: 0.32, mobile: 0.44 },
-        height: { default: 0.12, mobile: 0.14 },
+        width: '352px',
+        height: '74px',
       },
       fontScale: { default: 1.5, mobile: 1.35 },
       layer: 2,
     },
     camel: {
       position: { default: { x: 0.65, y: 0.34 }, mobile: { x: 0.6, y: 0.32 } },
+      size: {
+        width: '280px',
+        height: '150px',
+      },
       fontScale: { default: 1.5, mobile: 1.4 },
       layer: 3,
     },
     pond: {
       position: { default: { x: 0.75, y: 0.42 }, mobile: { x: 0.7, y: 0.46 } },
       size: {
-        width: { default: 0.22, mobile: 0.28 },
-        height: { default: 0.1, mobile: 0.12 },
+        width: '242px',
+        height: '62px',
       },
       fontScale: { default: 1.4, mobile: 1.3 },
       layer: 2,
@@ -62,14 +66,8 @@ const sceneLayout = {
     bucket: {
       position: { default: { x: 0.84, y: 0.36 }, mobile: { x: 0.8, y: 0.38 } },
       size: {
-        width: {
-          default: 'clamp(16px, 3vw, 28px)',
-          mobile: 'clamp(18px, 6vw, 28px)',
-        },
-        height: {
-          default: 'clamp(32px, 6vw, 56px)',
-          mobile: 'clamp(36px, 10vw, 64px)',
-        },
+        width: '28px',
+        height: '56px',
       },
       fontScale: { default: 0.55, mobile: 0.6 },
       layer: 2,
