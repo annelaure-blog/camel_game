@@ -126,16 +126,13 @@ function setupInitialGreeting() {
       { speaker: 'camel', text: 'Hello!' },
       { duration: 3000 },
       { speaker: 'me', text: 'Did the camel just say hello?' },
-      { speaker: 'bedouins', text: 'Of course.' },
-      { speaker: 'bedouins', text: '<em>* awkward silence*</em>' },
       { speaker: 'bedouins', text: 'What are you doing here?' },
       { speaker: 'me', text: 'I am a little lost.' },
       { speaker: 'bedouins', text: 'A little or completely lost.' },
       { speaker: 'me', text: 'OK I am completely lost.' },
-      { speaker: 'bedouins', text: 'They usually all are.' },
+      { speaker: 'bedouins', text: 'Like all the people we come across around here.' },
       { speaker: 'me', text: 'Maybe you can help me?' },
       { speaker: 'bedouins', text: 'Maybe we can.' },
-      { speaker: 'bedouins', text: '<em>* awkward silence*</em>' },
       {
         speaker: 'bedouins',
         text: 'But first we need to make some tea. Can you get us water and something to eat?',
@@ -143,7 +140,7 @@ function setupInitialGreeting() {
       { speaker: 'me', text: 'Emm... here?' },
       {
         speaker: 'bedouins',
-        text: 'Yes, here. Not at Lidl. Plus, the closest one is three camel riding days away.',
+        text: 'Yes. The closest supermarket is unfortunately three camel-riding days away.',
       },
       { speaker: 'me', text: 'Obviously.' },
     ];
