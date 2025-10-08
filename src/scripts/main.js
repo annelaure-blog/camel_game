@@ -103,10 +103,43 @@ function initializeGame() {
     isThought: true,
     duration: 3000,
   });
-  dialogueUI.show({
-    speaker: 'me',
-    text: getText('me.initialObservation'),
-  });
+  setupInitialGreeting();
+}
+
+function setupInitialGreeting() {
+  const meElement = actorElements.me;
+  if (!meElement) {
+    return;
+  }
+
+  let greetingShown = false;
+
+  const showGreeting = () => {
+    if (greetingShown) {
+      return;
+    }
+    greetingShown = true;
+
+    dialogueUI.show({
+      speaker: 'me',
+      text: 'Hello !',
+      duration: 3000,
+    });
+
+    setTimeout(() => {
+      dialogueUI.show({
+        speaker: 'bedouins',
+        text: 'Hello stranger !',
+        duration: 3000,
+      });
+    }, 3000);
+  };
+
+  meElement.addEventListener('animationend', showGreeting, { once: true });
+
+  setTimeout(() => {
+    showGreeting();
+  }, 6500);
 }
 
 initializeGame();
