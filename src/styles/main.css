@@ -92,6 +92,10 @@ body {
   background: #f4e3c2;
   color: #4a3a17;
 }
+.label[data-name="bucket"] {
+  background: #d9d9d9;
+  color: #1f1f1f;
+}
 
 .label[data-name="camel"] {
   background: #e2b980;
