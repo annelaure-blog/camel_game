@@ -18,8 +18,8 @@ const sceneLayout = {
         default: { x: 0.08, y: 0.24 },
       },
       size: {
-        width: '66px',
-        height: '372px',
+        width: '150px',
+        height: '450px',
       },
       fontScale: { default: 2.2 },
       layer: 4,
@@ -35,14 +35,18 @@ const sceneLayout = {
     },
     bedouins: {
       position: { default: { x: 0.32, y: 0.6 }, mobile: { x: 0.35, y: 0.62 } },
+      size: {
+        width: '250px',
+        height: '180px',
+      },
       fontScale: { default: 1.5, mobile: 1.35 },
       layer: 2,
     },
     camel: {
       position: { default: { x: 0.65, y: 0.34 } },
       size: {
-        width: '280px',
-        height: '150px',
+        width: '150px',
+        height: '100px',
       },
       fontScale: { default: 1.5 },
       layer: 3,
@@ -50,8 +54,8 @@ const sceneLayout = {
     pond: {
       position: { default: { x: 0.75, y: 0.42 } },
       size: {
-        width: '242px',
-        height: '62px',
+        width: '250px',
+        height: '100px',
       },
       fontScale: { default: 1.4 },
       layer: 2,
@@ -59,11 +63,17 @@ const sceneLayout = {
     bucket: {
       position: { default: { x: 0.84, y: 0.36 } },
       size: {
-        width: '28px',
-        height: '56px',
+        width: '40px',
+        height: '50px',
       },
       fontScale: { default: 0.55 },
       layer: 2,
+    },
+    me: {
+      size: {
+        width: '80px',
+        height: '100px',
+      },
     },
   },
 };
