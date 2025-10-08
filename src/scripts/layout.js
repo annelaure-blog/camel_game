@@ -25,10 +25,10 @@ const sceneLayout = {
       layer: 4,
     },
     carpet: {
-      position: { default: { x: 0.33, y: 0.68 } },
+      position: { default: { x: 0.33, y: 0.6 } },
       size: {
         width: '350px',
-        height: '275px',
+        height: '125px',
       },
       fontScale: { default: 1.6 },
       layer: 1,
@@ -43,7 +43,7 @@ const sceneLayout = {
       layer: 2,
     },
     camel: {
-      position: { default: { x: 0.63, y: 0.34 } },
+      position: { default: { x: 0.6, y: 0.34 } },
       size: {
         width: '150px',
         height: '100px',
