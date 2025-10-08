@@ -53,19 +53,32 @@ body {
   width: var(--size-width, max-content);
   height: var(--size-height, max-content);
   z-index: var(--layer, 2);
+  box-sizing: border-box;
+}
+
+.label--character {
+  width: 100px;
+  padding: 0;
+}
+
+.label--character.label--standing {
+  height: 170px;
+}
+
+.label--character.label--sitting {
+  height: 120px;
 }
 
 .label[data-name="me"] {
   font-weight: bold;
   background: black;
   color: white;
-  width: 40px;
-  height: 70px;
   top: 5%;
   left: 40%;
   animation: dashPath 6s ease-in-out forwards;
   z-index: 3;
   transform: scale(0.3);
+  transform-origin: center bottom;
 }
 
 .label[data-name="bedouins"] {
@@ -233,10 +246,6 @@ body {
 @media (max-width: 480px) {
   #game {
     aspect-ratio: 4 / 5;
-  }
-
-  .label[data-name="me"] {
-    left: 45%;
   }
 
   .verb {
