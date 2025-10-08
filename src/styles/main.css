@@ -5,7 +5,7 @@ body {
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   min-height: 100vh;
 }
 
@@ -146,9 +146,10 @@ body {
 
 #inventory,
 #verbs {
-  width: min(100vw, 1100px);
-  margin: 0 auto;
+  width: 100%;
+  margin: 0;
   border-top: 2px solid #000;
+  box-sizing: border-box;
 }
 
 #inventory {
@@ -158,6 +159,7 @@ body {
   gap: 0.5rem;
   padding: 0.75rem 1rem;
   font-size: clamp(0.95rem, 0.6vw + 0.7rem, 1.15rem);
+  margin-top: auto;
 }
 
 #verbs {
@@ -196,12 +198,10 @@ body {
 }
 
 @media (max-width: 768px) {
-  body {
-    padding: 0 1rem;
-  }
-
   #game {
     width: 100%;
+    padding: 0 1rem;
+    box-sizing: border-box;
   }
 
   #inventory {
