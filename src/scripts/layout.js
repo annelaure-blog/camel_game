@@ -43,7 +43,7 @@ const sceneLayout = {
       layer: 2,
     },
     camel: {
-      position: { default: { x: 0.60, y: 0.38 } },
+      position: { default: { x: 0.60, y: 0.42 } },
       size: {
         width: '150px',
         height: '100px',
