@@ -2,6 +2,56 @@ import { getText } from './texts.js';
 
 export const interactions = [
   {
+    verb: 'talk',
+    target: 'bedouins',
+    conditions: [],
+    dialogues: {
+      awaitingWater: { speaker: 'bedouins', textKey: 'interactions.talk.bedouins.awaitingWater', duration: 5000 },
+      awaitingWaterWithDates: { speaker: 'bedouins', textKey: 'interactions.talk.bedouins.awaitingWaterWithDates', duration: 5500 },
+      awaitingDates: { speaker: 'bedouins', textKey: 'interactions.talk.bedouins.awaitingDates', duration: 6000 },
+      gratitude: { speaker: 'bedouins', textKey: 'interactions.talk.bedouins.gratitude', duration: 6500 },
+    },
+    action: ({ worldEvents }) => {
+      const hasWater = worldEvents.hasGivenWater();
+      const hasDates = worldEvents.hasReceivedDates();
+
+      if (hasWater && hasDates) {
+        return 'gratitude';
+      }
+
+      if (hasWater) {
+        return 'awaitingDates';
+      }
+
+      if (hasDates) {
+        return 'awaitingWaterWithDates';
+      }
+
+      return 'awaitingWater';
+    },
+  },
+  {
+    verb: 'talk',
+    target: 'camel',
+    conditions: [],
+    dialogues: {
+      curious: { speaker: 'camel', textKey: 'interactions.talk.camel.curious', duration: 5000 },
+      sensesWater: { speaker: 'camel', textKey: 'interactions.talk.camel.sensesWater', duration: 5000 },
+      hopeful: { speaker: 'camel', textKey: 'interactions.talk.camel.hopeful', duration: 5500 },
+    },
+    action: ({ inventory, worldEvents }) => {
+      if (worldEvents.hasGivenWater() && worldEvents.hasReceivedDates()) {
+        return 'hopeful';
+      }
+
+      if (inventory.has('bucket of water')) {
+        return 'sensesWater';
+      }
+
+      return 'curious';
+    },
+  },
+  {
     verb: 'shake',
     target: 'palm tree',
     conditions: [],
@@ -112,6 +162,7 @@ export const interactions = [
       if (selectedItem === 'dates') {
         inventory.remove('dates');
         inventory.clearSelection();
+        worldEvents.markDatesDelivered();
         if (worldEvents.hasGivenWater()) {
           return 'datesAfterWater';
         }
