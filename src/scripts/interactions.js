@@ -162,7 +162,9 @@ export const interactions = [
       if (selectedItem === 'dates') {
         inventory.remove('dates');
         inventory.clearSelection();
-        worldEvents.markDatesDelivered();
+        if (typeof worldEvents.markDatesDelivered === 'function') {
+          worldEvents.markDatesDelivered();
+        }
         if (worldEvents.hasGivenWater()) {
           return 'datesAfterWater';
         }
