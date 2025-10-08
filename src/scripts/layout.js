@@ -15,7 +15,7 @@ const sceneLayout = {
   labels: {
     'palm tree': {
       position: {
-        default: { x: 0.08, y: 0.24 },
+        default: { x: 0.08, y: 0.32 },
       },
       size: {
         width: '150px',
@@ -25,25 +25,25 @@ const sceneLayout = {
       layer: 4,
     },
     carpet: {
-      position: { default: { x: 0.33, y: 0.76 } },
+      position: { default: { x: 0.33, y: 0.68 } },
       size: {
         width: '350px',
-        height: '250px',
+        height: '275px',
       },
       fontScale: { default: 1.6 },
       layer: 1,
     },
     bedouins: {
-      position: { default: { x: 0.32, y: 0.6 }, mobile: { x: 0.35, y: 0.62 } },
+      position: { default: { x: 0.32, y: 0.47 }, mobile: { x: 0.35, y: 0.49 } },
       size: {
         width: '250px',
-        height: '180px',
+        height: '130px',
       },
       fontScale: { default: 1.5, mobile: 1.35 },
       layer: 2,
     },
     camel: {
-      position: { default: { x: 0.65, y: 0.34 } },
+      position: { default: { x: 0.63, y: 0.34 } },
       size: {
         width: '150px',
         height: '100px',
@@ -61,9 +61,9 @@ const sceneLayout = {
       layer: 2,
     },
     bucket: {
-      position: { default: { x: 0.84, y: 0.36 } },
+      position: { default: { x: 0.84, y: 0.32 } },
       size: {
-        width: '40px',
+        width: '80px',
         height: '50px',
       },
       fontScale: { default: 0.55 },
