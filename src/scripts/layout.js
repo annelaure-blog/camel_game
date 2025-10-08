@@ -18,7 +18,7 @@ const sceneLayout = {
         default: { x: 0.08, y: 0.24 },
       },
       size: {
-        width: '132px',
+        width: '66px',
         height: '372px',
       },
       fontScale: { default: 2.2 },
@@ -27,8 +27,8 @@ const sceneLayout = {
     carpet: {
       position: { default: { x: 0.33, y: 0.76 } },
       size: {
-        width: '352px',
-        height: '99px',
+        width: '350px',
+        height: '250px',
       },
       fontScale: { default: 1.6 },
       layer: 1,
