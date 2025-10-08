@@ -1,0 +1,176 @@
+body {
+  margin: 0;
+  font-family: 'Courier New', monospace;
+  background: #c4b59a;
+  overflow: hidden;
+}
+
+#game {
+  position: relative;
+  width: 100vw;
+  height: 80vh;
+  background: #c4b59a;
+  overflow: hidden;
+}
+
+.ambient {
+  position: absolute;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #3d2f1a;
+  opacity: 0.5;
+  z-index: 0;
+}
+
+.label {
+  position: absolute;
+  border: 2px solid black;
+  padding: 4px 10px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 1.2rem;
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  color: black;
+  transition: transform 0.2s;
+  z-index: 2;
+}
+
+.label[data-name="me"] {
+  font-weight: bold;
+  background: black;
+  color: white;
+  width: 40px;
+  height: 70px;
+  top: 5%;
+  left: 40%;
+  animation: dashPath 6s ease-in-out forwards;
+  z-index: 3;
+  transform: scale(0.3);
+}
+
+@keyframes dashPath {
+  0% {
+    left: 40%;
+    top: 5%;
+    transform: scale(0.3);
+  }
+
+  25% {
+    left: 48%;
+    top: 20%;
+    transform: scale(0.4);
+  }
+
+  50% {
+    left: 55%;
+    top: 40%;
+    transform: scale(0.6);
+  }
+
+  75% {
+    left: 56%;
+    top: 60%;
+    transform: scale(0.8);
+  }
+
+  100% {
+    left: 52%;
+    top: 78%;
+    transform: scale(1);
+  }
+}
+
+.dialogue-box {
+  position: absolute;
+  padding: 6px 12px;
+  font-size: 1.1rem;
+  max-width: 60%;
+  display: none;
+  z-index: 10;
+  border: none;
+}
+
+.dialogue-me {
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+}
+
+.dialogue-other {
+  background: rgba(244, 227, 194, 0.95);
+  color: #4a3a17;
+}
+
+.dialogue-camel {
+  background: rgba(255, 230, 180, 0.95);
+  color: #2a1b0a;
+}
+
+.thought {
+  font-style: italic;
+  opacity: 0.9;
+  color: white;
+}
+
+.dates {
+  position: absolute;
+  width: 60px;
+  height: 25px;
+  background: #8b4513;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid black;
+  font-size: 1rem;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 2;
+}
+
+#inventory {
+  height: 5vh;
+  background: #eee2c4;
+  border-top: 2px solid #000;
+  display: flex;
+  align-items: center;
+  padding-left: 10px;
+  font-size: 1rem;
+}
+
+#verbs {
+  height: 10vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #f1e7d0;
+  border-top: 2px solid #000;
+}
+
+.verb {
+  margin: 0 10px;
+  padding: 6px 12px;
+  border: 1px solid black;
+  background: white;
+  cursor: pointer;
+}
+
+.verb.active {
+  background: black;
+  color: white;
+}
+
+.inventory-item {
+  cursor: pointer;
+  margin-right: 5px;
+}
+
+.inventory-item.active {
+  color: white;
+  background: black;
+  padding: 0 4px;
+  border-radius: 3px;
+}
