@@ -37,11 +37,13 @@ export class DialogueUI {
     dialogueElement.style.transform = 'translateX(-50%)';
   }
 
-  show({ speaker, text, isThought = false, duration = 3500 }) {
+  show({ speaker, text, isThought = false, duration = 3000 }) {
     const dialogueElement = this.dialogueElements[speaker];
     if (!dialogueElement) {
       return;
     }
+
+    this.applySpeakerStyles({ speaker, dialogueElement });
 
     dialogueElement.innerHTML = isThought ? `<span class="thought">{{${text}}}</span>` : text;
     dialogueElement.style.display = 'block';
@@ -71,5 +73,63 @@ export class DialogueUI {
       clearTimeout(this.hideTimers.get(speaker));
       this.hideTimers.delete(speaker);
     }
+  }
+
+  applySpeakerStyles({ speaker, dialogueElement }) {
+    const actorElement = this.actorElements[speaker];
+    if (!actorElement) {
+      return;
+    }
+
+    const computedStyles = window.getComputedStyle(actorElement);
+    const backgroundColor = computedStyles.backgroundColor;
+    const textColor = computedStyles.color;
+
+    const adjustedBackground = this.getColorWithOpacity(backgroundColor, 0.7);
+    if (adjustedBackground) {
+      dialogueElement.style.backgroundColor = adjustedBackground;
+    }
+
+    if (textColor) {
+      dialogueElement.style.color = textColor;
+    }
+  }
+
+  getColorWithOpacity(colorString, alpha) {
+    if (!colorString) {
+      return null;
+    }
+
+    if (colorString === 'transparent') {
+      return null;
+    }
+
+    const rgbaMatch = colorString.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/i);
+    if (rgbaMatch) {
+      const [, r, g, b, existingAlpha] = rgbaMatch;
+      if (existingAlpha !== undefined && Number.parseFloat(existingAlpha) === 0) {
+        return null;
+      }
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
+    if (colorString.startsWith('#')) {
+      let hex = colorString.slice(1);
+      if (hex.length === 3) {
+        hex = hex
+          .split('')
+          .map((char) => char + char)
+          .join('');
+      }
+
+      if (hex.length === 6) {
+        const r = parseInt(hex.slice(0, 2), 16);
+        const g = parseInt(hex.slice(2, 4), 16);
+        const b = parseInt(hex.slice(4, 6), 16);
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+      }
+    }
+
+    return null;
   }
 }

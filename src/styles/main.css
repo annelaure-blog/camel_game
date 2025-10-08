@@ -118,21 +118,8 @@ body {
   display: none;
   z-index: 10;
   border: none;
-}
-
-.dialogue-me {
-  background: rgba(0, 0, 0, 0.9);
-  color: white;
-}
-
-.dialogue-other {
-  background: rgba(244, 227, 194, 0.95);
-  color: #4a3a17;
-}
-
-.dialogue-camel {
-  background: rgba(255, 230, 180, 0.95);
-  color: #2a1b0a;
+  border-radius: 0;
+  background: rgba(255, 255, 255, 0.7);
 }
 
 .thought {
