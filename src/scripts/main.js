@@ -108,31 +108,75 @@ function setupInitialGreeting() {
 
   let greetingShown = false;
 
-  const showGreeting = () => {
+  const hideAllDialogues = () => {
+    Object.keys(dialogueElements).forEach((speaker) => {
+      dialogueUI.hide(speaker);
+    });
+  };
+
+  const playInitialSequence = () => {
     if (greetingShown) {
       return;
     }
     greetingShown = true;
 
-    dialogueUI.show({
-      speaker: 'me',
-      text: 'Hello !',
-      duration: 3000,
+    const sequence = [
+      { speaker: 'me', text: 'Hello!' },
+      { speaker: 'bedouins', text: 'Hello stranger!' },
+      { speaker: 'camel', text: 'Hello!' },
+      { duration: 3000 },
+      { speaker: 'me', text: 'Did the camel just say hello?' },
+      { speaker: 'bedouins', text: 'Of course.' },
+      { speaker: 'bedouins', text: '<em>* awkward silence*</em>' },
+      { speaker: 'bedouins', text: 'What are you doing here?' },
+      { speaker: 'me', text: 'I am a little lost.' },
+      { speaker: 'bedouins', text: 'A little or completely lost.' },
+      { speaker: 'me', text: 'OK I am completely lost.' },
+      { speaker: 'bedouins', text: 'They usually all are.' },
+      { speaker: 'me', text: 'Maybe you can help me?' },
+      { speaker: 'bedouins', text: 'Maybe we can.' },
+      { speaker: 'bedouins', text: '<em>* awkward silence*</em>' },
+      {
+        speaker: 'bedouins',
+        text: 'But first we need to make some tea. Can you get us water and something to eat?',
+      },
+      { speaker: 'me', text: 'Emm... here?' },
+      {
+        speaker: 'bedouins',
+        text: 'Yes, here. Not at Lidl. Plus, the closest one is three camel riding days away.',
+      },
+      { speaker: 'me', text: 'Obviously.' },
+    ];
+
+    let accumulatedDelay = 0;
+
+    sequence.forEach((step) => {
+      const duration = step.duration ?? 3000;
+
+      setTimeout(() => {
+        hideAllDialogues();
+
+        if (step.speaker) {
+          dialogueUI.show({
+            speaker: step.speaker,
+            text: step.text,
+            duration,
+          });
+        }
+      }, accumulatedDelay);
+
+      accumulatedDelay += duration;
     });
 
     setTimeout(() => {
-      dialogueUI.show({
-        speaker: 'bedouins',
-        text: 'Hello stranger !',
-        duration: 3000,
-      });
-    }, 3000);
+      hideAllDialogues();
+    }, accumulatedDelay);
   };
 
-  meElement.addEventListener('animationend', showGreeting, { once: true });
+  meElement.addEventListener('animationend', playInitialSequence, { once: true });
 
   setTimeout(() => {
-    showGreeting();
+    playInitialSequence();
   }, 6500);
 }
 
