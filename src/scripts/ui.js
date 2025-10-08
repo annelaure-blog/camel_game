@@ -2,10 +2,12 @@ export class DialogueUI {
   constructor({
     dialogueElements,
     actorElements,
+    gameElement,
   }) {
     this.dialogueElements = dialogueElements;
     this.actorElements = actorElements;
     this.hideTimers = new Map();
+    this.gameElement = gameElement || document.getElementById('game');
   }
 
   positionDialogue(speaker) {
@@ -17,9 +19,21 @@ export class DialogueUI {
     }
 
     const rect = actorElement.getBoundingClientRect();
-    const gameRect = document.getElementById('game').getBoundingClientRect();
-    dialogueElement.style.left = `${rect.left - gameRect.left + rect.width / 2}px`;
-    dialogueElement.style.top = `${rect.top - gameRect.top - 40}px`;
+    const gameRect = (this.gameElement || document.getElementById('game')).getBoundingClientRect();
+    const left = rect.left - gameRect.left + rect.width / 2;
+
+    let top = rect.top - gameRect.top - 40;
+    const visibleHeight = dialogueElement.offsetHeight;
+    const maxTop = gameRect.height - visibleHeight - 8;
+
+    if (!Number.isNaN(maxTop) && Number.isFinite(maxTop)) {
+      top = Math.min(Math.max(0, top), Math.max(0, maxTop));
+    } else {
+      top = Math.max(0, top);
+    }
+
+    dialogueElement.style.left = `${left}px`;
+    dialogueElement.style.top = `${top}px`;
     dialogueElement.style.transform = 'translateX(-50%)';
   }
 
@@ -29,9 +43,11 @@ export class DialogueUI {
       return;
     }
 
-    this.positionDialogue(speaker);
     dialogueElement.innerHTML = isThought ? `<span class="thought">{{${text}}}</span>` : text;
     dialogueElement.style.display = 'block';
+    dialogueElement.style.visibility = 'hidden';
+    this.positionDialogue(speaker);
+    dialogueElement.style.visibility = '';
 
     if (this.hideTimers.has(speaker)) {
       clearTimeout(this.hideTimers.get(speaker));
