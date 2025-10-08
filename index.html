@@ -1,19 +1,151 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cardboard Tea Adventure</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cardboard Desert Scene</title>
+  <style>
+    body { margin: 0; font-family: 'Courier New', monospace; background: #c4b59a; overflow: hidden; }
+    #game { position: relative; width: 100vw; height: 80vh; background: #c4b59a; overflow: hidden; }
+    .ambient { position: absolute; font-size: 1.1rem; font-weight: bold; color: #3d2f1a; opacity: 0.5; z-index: 0; }
+    .label { position: absolute; border: 2px solid black; padding: 4px 10px; cursor: pointer; user-select: none; font-size: 1.2rem; box-shadow: 2px 2px 4px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; background: white; color: black; transition: transform 0.2s; z-index: 2; }
+    .label[data-name="me"] { font-weight: bold; background: black; color: white; width: 40px; height: 70px; top: 5%; left: 40%; animation: dashPath 6s ease-in-out forwards; z-index: 3; transform: scale(0.3); }
+    @keyframes dashPath { 0%{left:40%;top:5%;transform:scale(0.3);}25%{left:48%;top:20%;transform:scale(0.4);}50%{left:55%;top:40%;transform:scale(0.6);}75%{left:56%;top:60%;transform:scale(0.8);}100%{left:52%;top:78%;transform:scale(1);} }
+    .dialogue-box { position: absolute; padding: 6px 12px; font-size: 1.1rem; max-width: 60%; display: none; z-index: 10; border: none; }
+    .dialogue-me { background: rgba(0,0,0,0.9); color: white; }
+    .dialogue-other { background: rgba(244,227,194,0.95); color: #4a3a17; }
+    .dialogue-camel { background: rgba(255,230,180,0.95); color: #2a1b0a; }
+    .thought { font-style: italic; opacity: 0.9; color: white; }
+    .dates { position: absolute; width: 60px; height: 25px; background: #8b4513; color: white; display: flex; align-items: center; justify-content: center; border: 2px solid black; font-size: 1rem; opacity: 0; cursor: pointer; z-index: 2; }
+    #inventory { height: 5vh; background: #eee2c4; border-top: 2px solid #000; display: flex; align-items: center; padding-left: 10px; font-size: 1rem; }
+    #verbs { height: 10vh; display: flex; justify-content: center; align-items: center; background: #f1e7d0; border-top: 2px solid #000; }
+    .verb { margin: 0 10px; padding: 6px 12px; border: 1px solid black; background: white; cursor: pointer; }
+    .verb.active { background: black; color: white; }
+    .inventory-item { cursor: pointer; margin-right: 5px; }
+    .inventory-item.active { color: white; background: black; padding: 0 4px; border-radius: 3px; }
+  </style>
 </head>
 <body>
   <div id="game">
-    <div id="scene"></div>
-    <div id="dialogue"></div>
+    <div class="ambient" style="top:5%;left:3%">dunes</div>
+    <div class="ambient" style="top:6%;left:15%">more dunes</div>
+    <div class="ambient" style="top:7%;left:35%">dunes</div>
+    <div class="ambient" style="top:5%;left:55%">more dunes</div>
+    <div class="ambient" style="top:6%;left:75%">dunes</div>
+    <div class="ambient" style="top:7%;left:90%">more dunes</div>
+    <div class="ambient" style="top:9%;left:10%">dunes</div>
+    <div class="ambient" style="top:10%;left:40%">more dunes</div>
+    <div class="ambient" style="top:9%;left:70%">dunes</div>
+
+    <div class="label" data-name="palm tree" style="font-size:3rem;width:100px;height:500px;top:calc(70% + 140px - 500px);left:5%">palm tree</div>
+    <div class="label" data-name="carpet" style="font-size:2rem;width:300px;height:140px;top:70%;left:18%;z-index:1">carpet</div>
+    <div class="label" data-name="bedouins" style="font-size:2rem;width:300px;height:80px;left:20%;top:58%;background:#f4e3c2;z-index:2">bedouins</div>
+    <div class="label" data-name="camel" style="font-size:2rem;top:28%;left:60%;background:#e2b980;color:#2a1b0a">camel</div>
+    <div class="label" data-name="pond" style="font-size:2rem;width:200px;height:60px;top:38%;left:65%">pond</div>
+    <div class="label" data-name="bucket" style="font-size:0.6rem;width:16px;height:32px;top:30%;left:77%">bucket</div>
+    <div class="label" data-name="me">ME</div>
+    <div class="dialogue-box dialogue-me" id="dialogue-me"></div>
+    <div class="dialogue-box dialogue-other" id="dialogue-bedouins"></div>
+    <div class="dialogue-box dialogue-camel" id="dialogue-camel"></div>
   </div>
   <div id="inventory">Inventory: <span id="inventory-items"></span></div>
-  <div id="verbs"></div>
-  
-  <script type="module" src="main.js"></script>
+  <div id="verbs">
+    <div class="verb" data-verb="talk">TALK TO</div>
+    <div class="verb" data-verb="shake">SHAKE</div>
+    <div class="verb" data-verb="use">USE</div>
+    <div class="verb" data-verb="pickup">PICK UP</div>
+    <div class="verb" data-verb="give">GIVE</div>
+    <div class="verb" data-verb="open">OPEN</div>
+  </div>
+  <script>
+    const dialogueMe=document.getElementById('dialogue-me');
+    const dialogueBedouins=document.getElementById('dialogue-bedouins');
+    const dialogueCamel=document.getElementById('dialogue-camel');
+    const bedouins=document.querySelector('[data-name="bedouins"]');
+    const me=document.querySelector('[data-name="me"]');
+    const camel=document.querySelector('[data-name="camel"]');
+    const bucket=document.querySelector('[data-name="bucket"]');
+    const pond=document.querySelector('[data-name="pond"]');
+
+    let selectedVerb=null;
+    let selectedItem=null;
+    const verbs=document.querySelectorAll('.verb');
+    const labels=document.querySelectorAll('.label');
+    const inventory=[];
+    const inventoryDisplay=document.getElementById('inventory-items');
+
+    let gaveWaterFirst=false;
+
+    verbs.forEach(v=>v.addEventListener('click',()=>{
+      verbs.forEach(x=>x.classList.remove('active'));
+      v.classList.add('active');
+      selectedVerb=v.dataset.verb;
+    }));
+
+    labels.forEach(label=>label.addEventListener('click',()=>{
+      if(!selectedVerb) return;
+      const name=label.dataset.name;
+      if(selectedVerb==='shake' && name==='palm tree') shakePalmTree();
+      if(selectedVerb==='pickup' && name==='bucket') pickUpBucket();
+      if(selectedVerb==='use' && name==='pond') useBucketOnPond();
+      if(selectedVerb==='give' && name==='bedouins') giveItemToBedouins();
+    }));
+
+    function positionDialogue(box,element){const rect=element.getBoundingClientRect();const gameRect=document.getElementById('game').getBoundingClientRect();box.style.left=rect.left-gameRect.left+rect.width/2+'px';box.style.top=rect.top-gameRect.top-40+'px';box.style.transform='translateX(-50%)';}
+    function showDialogue(box,text,isThought=false,duration=3500){box.innerHTML=isThought?`<span class='thought'>{{${text}}}</span>`:text;box.style.display='block';setTimeout(()=>hideDialogue(box),duration);}
+    function hideDialogue(box){box.style.display='none';}
+
+    function updateInventory(){
+      inventoryDisplay.innerHTML='';
+      inventory.forEach(item=>{
+        const span=document.createElement('span');
+        span.className='inventory-item';
+        span.textContent='['+item+']';
+        if(selectedItem===item) span.classList.add('active');
+        span.addEventListener('click',()=>{
+          document.querySelectorAll('.inventory-item').forEach(i=>i.classList.remove('active'));
+          span.classList.add('active');
+          selectedItem=item;
+        });
+        inventoryDisplay.appendChild(span);
+      });
+    }
+
+    function pickUpBucket(){const game=document.getElementById('game');if(!inventory.includes('bucket')){game.removeChild(bucket);inventory.push('bucket');updateInventory();positionDialogue(dialogueMe,me);showDialogue(dialogueMe,'Got the bucket.');}}
+    function useBucketOnPond(){if(inventory.includes('bucket')&&!inventory.includes('bucket of water')){inventory.splice(inventory.indexOf('bucket'),1);inventory.push('bucket of water');updateInventory();positionDialogue(dialogueMe,me);showDialogue(dialogueMe,'Filled the bucket with water.');}else if(!inventory.includes('bucket')){positionDialogue(dialogueMe,me);showDialogue(dialogueMe,'I need a bucket first.');}}
+
+    function giveItemToBedouins(){
+      if(selectedItem==='dates'){
+        inventory.splice(inventory.indexOf('dates'),1);
+        updateInventory();
+        positionDialogue(dialogueBedouins,bedouins);
+        if(gaveWaterFirst){
+          showDialogue(dialogueBedouins,'Wonderful, we can start making the tea now.',false,12000);
+        } else {
+          showDialogue(dialogueBedouins,'Nice.',false,3000);
+        }
+      }
+      else if(selectedItem==='bucket of water'){
+        inventory.splice(inventory.indexOf('bucket of water'),1);
+        updateInventory();
+        positionDialogue(dialogueBedouins,bedouins);
+        if(inventory.includes('dates')){
+          showDialogue(dialogueBedouins,'Nice.',false,3000);
+          gaveWaterFirst=true;
+        } else {
+          showDialogue(dialogueBedouins,'Nice.',false,3000);
+          gaveWaterFirst=true;
+        }
+      }
+      else {
+        positionDialogue(dialogueBedouins,bedouins);
+        showDialogue(dialogueBedouins,'We don\'t need that right now.',false,3000);
+      }
+      selectedItem=null;
+    }
+
+    function shakePalmTree(){const palmTree=document.querySelector('[data-name="palm tree"]');palmTree.style.transform='rotate(-5deg)';setTimeout(()=>{palmTree.style.transform='rotate(5deg)';setTimeout(()=>{palmTree.style.transform='rotate(0deg)';dropDates();},200);},200);}
+    function dropDates(){const game=document.getElementById('game');const palmTree=document.querySelector('[data-name="palm tree"]');const treeRect=palmTree.getBoundingClientRect();const gameRect=game.getBoundingClientRect();const dates=document.createElement('div');dates.classList.add('dates');dates.textContent='dates';const leftPos=((treeRect.left-gameRect.left)+treeRect.width/2-30)+'px';const topStart=(treeRect.top-gameRect.top+20);const topEnd=(treeRect.bottom-gameRect.top-25);dates.style.left=leftPos;dates.style.top=topStart+'px';game.appendChild(dates);dates.animate([{transform:`translateY(0)`,opacity:1},{transform:`translateY(${topEnd-topStart}px)`,opacity:1}],{duration:2000,fill:'forwards'});dates.addEventListener('click',()=>{if(selectedVerb==='pickup'){game.removeChild(dates);inventory.push('dates');updateInventory();}});}
+  </script>
 </body>
 </html>
