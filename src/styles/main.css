@@ -173,7 +173,7 @@ body {
   font-size: 1rem;
   opacity: 0;
   cursor: pointer;
-  z-index: 2;
+  z-index: 6;
   padding: 0.25rem;
   box-sizing: border-box;
   overflow-wrap: anywhere;

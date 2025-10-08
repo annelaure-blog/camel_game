@@ -22,7 +22,8 @@ export class DialogueUI {
     const gameRect = (this.gameElement || document.getElementById('game')).getBoundingClientRect();
     const left = rect.left - gameRect.left + rect.width / 2;
 
-    let top = rect.top - gameRect.top - 40;
+    const verticalOffset = 60;
+    let top = rect.top - gameRect.top - verticalOffset;
     const visibleHeight = dialogueElement.offsetHeight;
     const maxTop = gameRect.height - visibleHeight - 8;
 

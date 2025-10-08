@@ -28,7 +28,7 @@ const sceneLayout = {
       position: { default: { x: 0.33, y: 0.6 } },
       size: {
         width: '350px',
-        height: '125px',
+        height: '250px',
       },
       fontScale: { default: 1.6 },
       layer: 1,
