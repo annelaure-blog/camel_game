@@ -27,6 +27,7 @@ renderSceneLayout(gameElement);
 const dialogueUI = new DialogueUI({
   dialogueElements,
   actorElements,
+  gameElement,
 });
 
 const inventoryDisplay = document.getElementById('inventory-items');
