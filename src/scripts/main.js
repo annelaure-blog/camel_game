@@ -7,6 +7,7 @@ import {
   giveItemToBedouins,
 } from './interactions.js';
 import { shakePalmTree } from './scene.js';
+import { renderSceneLayout } from './layout.js';
 
 const dialogueMe = document.getElementById('dialogue-me');
 const dialogueBedouins = document.getElementById('dialogue-bedouins');
@@ -17,6 +18,8 @@ const camel = document.querySelector('[data-name="camel"]');
 const bucket = document.querySelector('[data-name="bucket"]');
 const palmTree = document.querySelector('[data-name="palm tree"]');
 const gameElement = document.getElementById('game');
+
+renderSceneLayout(gameElement);
 
 let selectedVerb = null;
 const verbs = document.querySelectorAll('.verb');
