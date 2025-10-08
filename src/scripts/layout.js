@@ -1,6 +1,4 @@
-const layoutModes = [
-  { name: 'mobile', query: '(max-width: 768px)' },
-];
+const layoutModes = [];
 
 const sceneLayout = {
   ambients: [
@@ -18,58 +16,57 @@ const sceneLayout = {
     'palm tree': {
       position: {
         default: { x: 0.08, y: 0.24 },
-        mobile: { x: 0.12, y: 0.3 },
       },
       size: {
         width: '132px',
         height: '372px',
       },
-      fontScale: { default: 2.2, mobile: 1.9 },
+      fontScale: { default: 2.2 },
       layer: 4,
     },
     carpet: {
-      position: { default: { x: 0.33, y: 0.76 }, mobile: { x: 0.35, y: 0.78 } },
+      position: { default: { x: 0.33, y: 0.76 } },
       size: {
         width: '352px',
         height: '99px',
       },
-      fontScale: { default: 1.6, mobile: 1.4 },
+      fontScale: { default: 1.6 },
       layer: 1,
     },
     bedouins: {
-      position: { default: { x: 0.32, y: 0.6 }, mobile: { x: 0.35, y: 0.62 } },
+      position: { default: { x: 0.32, y: 0.6 } },
       size: {
         width: '352px',
         height: '74px',
       },
-      fontScale: { default: 1.5, mobile: 1.35 },
+      fontScale: { default: 1.5 },
       layer: 2,
     },
     camel: {
-      position: { default: { x: 0.65, y: 0.34 }, mobile: { x: 0.6, y: 0.32 } },
+      position: { default: { x: 0.65, y: 0.34 } },
       size: {
         width: '280px',
         height: '150px',
       },
-      fontScale: { default: 1.5, mobile: 1.4 },
+      fontScale: { default: 1.5 },
       layer: 3,
     },
     pond: {
-      position: { default: { x: 0.75, y: 0.42 }, mobile: { x: 0.7, y: 0.46 } },
+      position: { default: { x: 0.75, y: 0.42 } },
       size: {
         width: '242px',
         height: '62px',
       },
-      fontScale: { default: 1.4, mobile: 1.3 },
+      fontScale: { default: 1.4 },
       layer: 2,
     },
     bucket: {
-      position: { default: { x: 0.84, y: 0.36 }, mobile: { x: 0.8, y: 0.38 } },
+      position: { default: { x: 0.84, y: 0.36 } },
       size: {
         width: '28px',
         height: '56px',
       },
-      fontScale: { default: 0.55, mobile: 0.6 },
+      fontScale: { default: 0.55 },
       layer: 2,
     },
   },
