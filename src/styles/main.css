@@ -57,16 +57,16 @@ body {
 }
 
 .label--character {
-  width: 100px;
+  width: var(--size-width, 100px);
   padding: 0;
 }
 
 .label--character.label--standing {
-  height: 170px;
+  height: var(--size-height, 170px);
 }
 
 .label--character.label--sitting {
-  height: 120px;
+  height: var(--size-height, 120px);
 }
 
 .label[data-name="me"] {
