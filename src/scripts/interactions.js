@@ -77,7 +77,7 @@ function giveItemToBedouins({
         dialogueElement,
         'Wonderful, we can start making the tea now.',
         false,
-        12000,
+        12000
       );
     } else {
       showDialogue(dialogueElement, 'Nice.', false, 3000);
