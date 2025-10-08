@@ -1,7 +1,5 @@
 export const TEXTS = {
-  camel: {
-    initialThought: 'hmm... water?',
-  },
+  camel: {},
   me: {
     initialObservation: 'The desert is quiet.',
   },

@@ -97,12 +97,6 @@ labels.forEach((label) => {
 
 function initializeGame() {
   inventory.render();
-  dialogueUI.show({
-    speaker: 'camel',
-    text: getText('camel.initialThought'),
-    isThought: true,
-    duration: 3000,
-  });
   setupInitialGreeting();
 }
 
