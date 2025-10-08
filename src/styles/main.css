@@ -20,7 +20,7 @@ body {
   --scene-width: 100%;
   --scene-height: 100%;
   --ambient-font-base: clamp(0.9rem, 1vw + 0.3rem, 1.4rem);
-  --label-font-base: clamp(1rem, 1vw + 0.6rem, 2.4rem);
+  --label-font-base: clamp(0.85rem, 0.85vw + 0.4rem, 1.8rem);
 }
 
 #menu {
@@ -39,6 +39,10 @@ body {
   font-size: calc(var(--ambient-font-base) * var(--font-scale, 1));
   top: calc(var(--pos-y, 0) * 100%);
   left: calc(var(--pos-x, 0) * 100%);
+  padding: 0.25rem 0.4rem;
+  box-sizing: border-box;
+  overflow-wrap: anywhere;
+  text-align: center;
 }
 
 .label {
@@ -61,6 +65,9 @@ body {
   height: var(--size-height, max-content);
   z-index: var(--layer, 2);
   box-sizing: border-box;
+  padding: 0.5rem 0.75rem;
+  overflow-wrap: anywhere;
+  text-align: center;
 }
 
 .label--character {
@@ -136,14 +143,15 @@ body {
 
 .dialogue-box {
   position: absolute;
-  padding: 6px 12px;
-  font-size: 1.1rem;
+  padding: 0.75rem 1rem;
+  font-size: clamp(0.9rem, 0.7vw + 0.6rem, 1.05rem);
   max-width: 60%;
   display: none;
   z-index: 10;
   border: none;
   border-radius: 0;
   background: rgba(255, 255, 255, 0.7);
+  overflow-wrap: anywhere;
 }
 
 .thought {
@@ -166,6 +174,9 @@ body {
   opacity: 0;
   cursor: pointer;
   z-index: 2;
+  padding: 0.25rem;
+  box-sizing: border-box;
+  overflow-wrap: anywhere;
 }
 
 #inventory,
@@ -174,6 +185,7 @@ body {
   margin: 0;
   border-top: 2px solid #000;
   box-sizing: border-box;
+  overflow-wrap: anywhere;
 }
 
 #inventory {
@@ -181,10 +193,9 @@ body {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0 1rem;
-  height: 50px;
-  flex: 0 0 50px;
-  font-size: clamp(0.95rem, 0.6vw + 0.7rem, 1.15rem);
+  padding: 0.75rem 1rem;
+  font-size: clamp(0.85rem, 0.5vw + 0.65rem, 1.05rem);
+  margin-top: auto;
 }
 
 #verbs {
@@ -196,15 +207,17 @@ body {
   height: 80px;
   flex: 0 0 80px;
   gap: 0.75rem;
-  font-size: clamp(1rem, 0.8vw + 0.6rem, 1.2rem);
+  font-size: clamp(0.95rem, 0.7vw + 0.55rem, 1.1rem);
 }
 
 .verb {
   margin: 0;
-  padding: 0.5rem 1rem;
+  padding: 0.6rem 1.1rem;
   border: 1px solid black;
   background: white;
   cursor: pointer;
+  box-sizing: border-box;
+  overflow-wrap: anywhere;
 }
 
 .verb.active {
