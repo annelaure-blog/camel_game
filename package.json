@@ -1,0 +1,11 @@
+{
+  "name": "camel_game",
+  "version": "1.0.0",
+  "description": "Cardboard desert scene served from src directory",
+  "scripts": {
+    "start": "npx serve src",
+    "build": "rm -rf dist && cp -r src dist"
+  },
+  "author": "",
+  "license": "MIT"
+}
