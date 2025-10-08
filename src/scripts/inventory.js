@@ -1,57 +1,74 @@
-const inventory = [];
-let selectedItem = null;
-
-function addItem(item) {
-  if (!inventory.includes(item)) {
-    inventory.push(item);
+export class Inventory {
+  constructor({ displayElement } = {}) {
+    this.items = [];
+    this.selectedItem = null;
+    this.displayElement = displayElement || null;
   }
-}
 
-function removeItem(item) {
-  const index = inventory.indexOf(item);
-  if (index !== -1) {
-    inventory.splice(index, 1);
+  setDisplayElement(element) {
+    this.displayElement = element;
+    this.render();
   }
-}
 
-function hasItem(item) {
-  return inventory.includes(item);
-}
-
-function getSelectedItem() {
-  return selectedItem;
-}
-
-function clearSelectedItem() {
-  selectedItem = null;
-}
-
-function updateInventory(inventoryDisplay) {
-  inventoryDisplay.innerHTML = '';
-  inventory.forEach((item) => {
-    const span = document.createElement('span');
-    span.className = 'inventory-item';
-    span.textContent = `[${item}]`;
-    if (selectedItem === item) {
-      span.classList.add('active');
+  add(item) {
+    if (!this.items.includes(item)) {
+      this.items.push(item);
+      this.render();
     }
-    span.addEventListener('click', () => {
-      document.querySelectorAll('.inventory-item').forEach((element) => {
-        element.classList.remove('active');
-      });
-      span.classList.add('active');
-      selectedItem = item;
-    });
-    inventoryDisplay.appendChild(span);
-  });
-}
+  }
 
-export {
-  inventory,
-  addItem,
-  removeItem,
-  hasItem,
-  getSelectedItem,
-  clearSelectedItem,
-  updateInventory,
-};
+  remove(item) {
+    const index = this.items.indexOf(item);
+    if (index !== -1) {
+      this.items.splice(index, 1);
+      if (this.selectedItem === item) {
+        this.selectedItem = null;
+      }
+      this.render();
+    }
+  }
+
+  has(item) {
+    return this.items.includes(item);
+  }
+
+  getSelectedItem() {
+    return this.selectedItem;
+  }
+
+  clearSelection() {
+    if (this.selectedItem != null) {
+      this.selectedItem = null;
+      this.render();
+    }
+  }
+
+  select(item) {
+    if (this.selectedItem === item) {
+      this.selectedItem = null;
+    } else {
+      this.selectedItem = item;
+    }
+    this.render();
+  }
+
+  render() {
+    if (!this.displayElement) {
+      return;
+    }
+
+    this.displayElement.innerHTML = '';
+    this.items.forEach((item) => {
+      const span = document.createElement('span');
+      span.className = 'inventory-item';
+      span.textContent = `[${item}]`;
+      if (this.selectedItem === item) {
+        span.classList.add('active');
+      }
+      span.addEventListener('click', () => {
+        this.select(item);
+      });
+      this.displayElement.appendChild(span);
+    });
+  }
+}

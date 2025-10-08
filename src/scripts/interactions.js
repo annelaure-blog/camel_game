@@ -1,116 +1,180 @@
-import {
-  addItem,
-  removeItem,
-  hasItem,
-  updateInventory,
-  getSelectedItem,
-  clearSelectedItem,
-} from './inventory.js';
+import { getText } from './texts.js';
 
-function positionDialogue(box, element) {
-  const rect = element.getBoundingClientRect();
-  const gameRect = document.getElementById('game').getBoundingClientRect();
-  box.style.left = `${rect.left - gameRect.left + rect.width / 2}px`;
-  box.style.top = `${rect.top - gameRect.top - 40}px`;
-  box.style.transform = 'translateX(-50%)';
-}
+export const interactions = [
+  {
+    verb: 'shake',
+    target: 'palm tree',
+    conditions: [],
+    dialogues: {
+      noEffect: { speaker: 'me', textKey: 'interactions.shake.palmTree.noEffect', duration: 2500 },
+    },
+    action: ({ worldEvents }) => {
+      worldEvents.shakePalmTree();
+      return 'noEffect';
+    },
+  },
+  {
+    verb: 'pickup',
+    target: 'bucket',
+    conditions: [
+      {
+        check: ({ inventory }) => !inventory.has('bucket'),
+        failDialogueKey: 'already',
+      },
+      {
+        check: ({ elements }) => elements.bucket && elements.game.contains(elements.bucket),
+        failDialogueKey: 'missing',
+      },
+    ],
+    dialogues: {
+      success: { speaker: 'me', textKey: 'interactions.pickup.bucket.success' },
+      missing: { speaker: 'me', textKey: 'interactions.pickup.bucket.missing' },
+      already: { speaker: 'me', textKey: 'interactions.pickup.bucket.already' },
+    },
+    action: ({ elements, inventory }) => {
+      if (elements.bucket && elements.game.contains(elements.bucket)) {
+        elements.game.removeChild(elements.bucket);
+      }
+      inventory.add('bucket');
+      inventory.clearSelection();
+      return 'success';
+    },
+  },
+  {
+    verb: 'pickup',
+    target: 'dates',
+    conditions: [
+      {
+        check: ({ worldEvents }) => worldEvents.hasDatesOnGround(),
+        failDialogueKey: 'missing',
+      },
+    ],
+    dialogues: {
+      success: { speaker: 'me', textKey: 'interactions.pickup.dates.success' },
+      missing: { speaker: 'me', textKey: 'interactions.pickup.dates.missing' },
+    },
+    action: ({ worldEvents, inventory }) => {
+      if (worldEvents.collectDates()) {
+        inventory.add('dates');
+        inventory.clearSelection();
+        return 'success';
+      }
+      return null;
+    },
+  },
+  {
+    verb: 'use',
+    target: 'pond',
+    conditions: [
+      {
+        check: ({ inventory }) => !inventory.has('bucket of water'),
+        failDialogueKey: 'alreadyFull',
+      },
+      {
+        check: ({ inventory }) => inventory.has('bucket'),
+        failDialogueKey: 'missingBucket',
+      },
+    ],
+    dialogues: {
+      success: { speaker: 'me', textKey: 'interactions.use.pond.success' },
+      missingBucket: { speaker: 'me', textKey: 'interactions.use.pond.missingBucket' },
+      alreadyFull: { speaker: 'me', textKey: 'interactions.use.pond.alreadyFull' },
+    },
+    action: ({ inventory }) => {
+      inventory.remove('bucket');
+      inventory.add('bucket of water');
+      inventory.clearSelection();
+      return 'success';
+    },
+  },
+  {
+    verb: 'give',
+    target: 'bedouins',
+    conditions: [
+      {
+        check: ({ inventory }) => Boolean(inventory.getSelectedItem()),
+        failDialogueKey: 'nothingSelected',
+      },
+    ],
+    dialogues: {
+      nothingSelected: { speaker: 'me', textKey: 'interactions.give.bedouins.nothingSelected' },
+      wrongItem: { speaker: 'bedouins', textKey: 'interactions.give.bedouins.wrongItem' },
+      datesBeforeWater: { speaker: 'bedouins', textKey: 'interactions.give.bedouins.datesBeforeWater' },
+      datesAfterWater: { speaker: 'bedouins', textKey: 'interactions.give.bedouins.datesAfterWater', duration: 12000 },
+      water: { speaker: 'bedouins', textKey: 'interactions.give.bedouins.water' },
+    },
+    action: ({ inventory, worldEvents }) => {
+      const selectedItem = inventory.getSelectedItem();
+      if (!selectedItem) {
+        return 'nothingSelected';
+      }
 
-function showDialogue(box, text, isThought = false, duration = 3500) {
-  box.innerHTML = isThought ? `<span class='thought'>{{${text}}}</span>` : text;
-  box.style.display = 'block';
-  setTimeout(() => hideDialogue(box), duration);
-}
+      if (selectedItem === 'dates') {
+        inventory.remove('dates');
+        inventory.clearSelection();
+        if (worldEvents.hasGivenWater()) {
+          return 'datesAfterWater';
+        }
+        return 'datesBeforeWater';
+      }
 
-function hideDialogue(box) {
-  box.style.display = 'none';
-}
+      if (selectedItem === 'bucket of water') {
+        inventory.remove('bucket of water');
+        inventory.clearSelection();
+        worldEvents.markWaterDelivered();
+        return 'water';
+      }
 
-function pickUpBucket({
-  gameElement,
-  bucketElement,
-  inventoryDisplay,
-  meElement,
-  dialogueElement,
-}) {
-  if (!bucketElement || !gameElement.contains(bucketElement)) {
+      inventory.clearSelection();
+      return 'wrongItem';
+    },
+  },
+];
+
+function playDialogue(context, config, overrides = {}) {
+  if (!context.ui || !config) {
     return;
   }
 
-  if (!hasItem('bucket')) {
-    gameElement.removeChild(bucketElement);
-    addItem('bucket');
-    updateInventory(inventoryDisplay);
-    positionDialogue(dialogueElement, meElement);
-    showDialogue(dialogueElement, 'Got the bucket.');
-  }
+  const resolveText = context.getText || getText;
+  const text = overrides.text || resolveText(config.textKey);
+  const duration = overrides.duration || config.duration || 3500;
+  const isThought = overrides.isThought != null ? overrides.isThought : config.isThought || false;
+
+  context.ui.show({
+    speaker: config.speaker,
+    text,
+    isThought,
+    duration,
+  });
 }
 
-function useBucketOnPond({ inventoryDisplay, meElement, dialogueElement }) {
-  if (hasItem('bucket') && !hasItem('bucket of water')) {
-    removeItem('bucket');
-    addItem('bucket of water');
-    updateInventory(inventoryDisplay);
-    positionDialogue(dialogueElement, meElement);
-    showDialogue(dialogueElement, 'Filled the bucket with water.');
-  } else if (!hasItem('bucket')) {
-    positionDialogue(dialogueElement, meElement);
-    showDialogue(dialogueElement, 'I need a bucket first.');
+export function runInteraction({ verb, target, context }) {
+  const interaction = interactions.find((entry) => entry.verb === verb && entry.target === target);
+  if (!interaction) {
+    return false;
   }
-}
 
-function giveItemToBedouins({
-  inventoryDisplay,
-  bedouinsElement,
-  dialogueElement,
-  gaveWaterState,
-}) {
-  const selectedItem = getSelectedItem();
-
-  if (selectedItem === 'dates') {
-    removeItem('dates');
-    clearSelectedItem();
-    updateInventory(inventoryDisplay);
-    positionDialogue(dialogueElement, bedouinsElement);
-
-    if (gaveWaterState.value) {
-      showDialogue(
-        dialogueElement,
-        'Wonderful, we can start making the tea now.',
-        false,
-        12000
-      );
-    } else {
-      showDialogue(dialogueElement, 'Nice.', false, 3000);
+  const conditions = interaction.conditions || [];
+  for (const condition of conditions) {
+    const passed = condition.check ? condition.check(context) : true;
+    if (!passed) {
+      if (condition.failDialogueKey && interaction.dialogues?.[condition.failDialogueKey]) {
+        playDialogue(context, interaction.dialogues[condition.failDialogueKey]);
+      }
+      return false;
     }
-  } else if (selectedItem === 'bucket of water') {
-    removeItem('bucket of water');
-    clearSelectedItem();
-    updateInventory(inventoryDisplay);
-    positionDialogue(dialogueElement, bedouinsElement);
-
-    if (hasItem('dates')) {
-      showDialogue(dialogueElement, 'Nice.', false, 3000);
-      gaveWaterState.value = true;
-    } else {
-      showDialogue(dialogueElement, 'Nice.', false, 3000);
-      gaveWaterState.value = true;
-    }
-  } else if (selectedItem) {
-    clearSelectedItem();
-    positionDialogue(dialogueElement, bedouinsElement);
-    showDialogue(dialogueElement, "We don't need that right now.", false, 3000);
-    updateInventory(inventoryDisplay);
-  } else {
-    positionDialogue(dialogueElement, bedouinsElement);
-    showDialogue(dialogueElement, 'We don't need that right now.', false, 3000);
   }
-}
 
-export {
-  positionDialogue,
-  showDialogue,
-  hideDialogue,
-  pickUpBucket,
-  useBucketOnPond,
-  giveItemToBedouins,
-};
+  const result = interaction.action(context);
+  if (!result) {
+    return true;
+  }
+
+  const outcome = typeof result === 'string' ? { dialogueKey: result } : result;
+  if (outcome.dialogueKey && interaction.dialogues?.[outcome.dialogueKey]) {
+    playDialogue(context, interaction.dialogues[outcome.dialogueKey], outcome);
+  }
+
+  return true;
+}

@@ -1,31 +1,72 @@
-import { updateInventory } from './inventory.js';
-import {
-  positionDialogue,
-  showDialogue,
-  pickUpBucket,
-  useBucketOnPond,
-  giveItemToBedouins,
-} from './interactions.js';
-import { shakePalmTree } from './scene.js';
+import { Inventory } from './inventory.js';
+import { DialogueUI } from './ui.js';
+import { runInteraction } from './interactions.js';
+import { WorldEvents } from './world-events.js';
 import { renderSceneLayout } from './layout.js';
+import { getText } from './texts.js';
 
-const dialogueMe = document.getElementById('dialogue-me');
-const dialogueBedouins = document.getElementById('dialogue-bedouins');
-const dialogueCamel = document.getElementById('dialogue-camel');
-const bedouins = document.querySelector('[data-name="bedouins"]');
-const me = document.querySelector('[data-name="me"]');
-const camel = document.querySelector('[data-name="camel"]');
+const dialogueElements = {
+  me: document.getElementById('dialogue-me'),
+  bedouins: document.getElementById('dialogue-bedouins'),
+  camel: document.getElementById('dialogue-camel'),
+};
+
+const actorElements = {
+  me: document.querySelector('[data-name="me"]'),
+  bedouins: document.querySelector('[data-name="bedouins"]'),
+  camel: document.querySelector('[data-name="camel"]'),
+};
+
 const bucket = document.querySelector('[data-name="bucket"]');
 const palmTree = document.querySelector('[data-name="palm tree"]');
+const pond = document.querySelector('[data-name="pond"]');
 const gameElement = document.getElementById('game');
 
 renderSceneLayout(gameElement);
 
+const dialogueUI = new DialogueUI({
+  dialogueElements,
+  actorElements,
+});
+
+const inventoryDisplay = document.getElementById('inventory-items');
+const inventory = new Inventory({ displayElement: inventoryDisplay });
+
 let selectedVerb = null;
 const verbs = document.querySelectorAll('.verb');
 const labels = document.querySelectorAll('.label');
-const inventoryDisplay = document.getElementById('inventory-items');
-const gaveWaterState = { value: false };
+
+const context = {
+  inventory,
+  ui: dialogueUI,
+  getText,
+  worldEvents: null,
+  elements: {
+    game: gameElement,
+    bucket,
+    pond,
+    palmTree,
+    me: actorElements.me,
+    bedouins: actorElements.bedouins,
+    camel: actorElements.camel,
+  },
+};
+
+const handleInteraction = (verb, target) => {
+  if (!verb) {
+    return;
+  }
+  runInteraction({ verb, target, context });
+};
+
+const worldEvents = new WorldEvents({
+  gameElement,
+  palmTreeElement: palmTree,
+  getSelectedVerb: () => selectedVerb,
+  onInteraction: ({ verb, target }) => handleInteraction(verb, target),
+});
+
+context.worldEvents = worldEvents;
 
 verbs.forEach((verbElement) => {
   verbElement.addEventListener('click', () => {
@@ -41,59 +82,22 @@ labels.forEach((label) => {
       return;
     }
     const name = label.dataset.name;
-
-    if (selectedVerb === 'shake' && name === 'palm tree') {
-      shakePalmTree({
-        palmTreeElement: palmTree,
-        gameElement,
-        inventoryDisplay,
-        getSelectedVerb: () => selectedVerb,
-      });
-    }
-
-    if (selectedVerb === 'pickup' && name === 'bucket') {
-      pickUpBucket({
-        gameElement,
-        bucketElement: bucket,
-        inventoryDisplay,
-        meElement: me,
-        dialogueElement: dialogueMe,
-      });
-    }
-
-    if (selectedVerb === 'use' && name === 'pond') {
-      useBucketOnPond({
-        inventoryDisplay,
-        meElement: me,
-        dialogueElement: dialogueMe,
-      });
-    }
-
-    if (selectedVerb === 'give' && name === 'bedouins') {
-      giveItemToBedouins({
-        inventoryDisplay,
-        bedouinsElement: bedouins,
-        dialogueElement: dialogueBedouins,
-        gaveWaterState,
-      });
-    }
+    handleInteraction(selectedVerb, name);
   });
 });
 
-function showCamelThought(text) {
-  positionDialogue(dialogueCamel, camel);
-  showDialogue(dialogueCamel, text, true, 3000);
-}
-
-function showMeDialogue(text) {
-  positionDialogue(dialogueMe, me);
-  showDialogue(dialogueMe, text);
-}
-
 function initializeGame() {
-  updateInventory(inventoryDisplay);
-  showCamelThought('hmm... water?');
-  showMeDialogue('The desert is quiet.');
+  inventory.render();
+  dialogueUI.show({
+    speaker: 'camel',
+    text: getText('camel.initialThought'),
+    isThought: true,
+    duration: 3000,
+  });
+  dialogueUI.show({
+    speaker: 'me',
+    text: getText('me.initialObservation'),
+  });
 }
 
 initializeGame();
