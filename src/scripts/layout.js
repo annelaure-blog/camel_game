@@ -34,12 +34,8 @@ const sceneLayout = {
       layer: 1,
     },
     bedouins: {
-      position: { default: { x: 0.32, y: 0.6 } },
-      size: {
-        width: '352px',
-        height: '74px',
-      },
-      fontScale: { default: 1.5 },
+      position: { default: { x: 0.32, y: 0.6 }, mobile: { x: 0.35, y: 0.62 } },
+      fontScale: { default: 1.5, mobile: 1.35 },
       layer: 2,
     },
     camel: {
