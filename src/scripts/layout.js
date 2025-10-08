@@ -28,22 +28,22 @@ const sceneLayout = {
       position: { default: { x: 0.33, y: 0.6 } },
       size: {
         width: '350px',
-        height: '125px',
+        height: '300px',
       },
       fontScale: { default: 1.6 },
       layer: 1,
     },
     bedouins: {
-      position: { default: { x: 0.32, y: 0.47 }, mobile: { x: 0.35, y: 0.49 } },
+      position: { default: { x: 0.32, y: 0.67 }, mobile: { x: 0.35, y: 0.49 } },
       size: {
         width: '250px',
-        height: '180px',
+        height: '130px',
       },
       fontScale: { default: 1.5, mobile: 1.35 },
       layer: 2,
     },
     camel: {
-      position: { default: { x: 0.6, y: 0.34 } },
+      position: { default: { x: 0.8, y: 0.34 } },
       size: {
         width: '150px',
         height: '100px',
