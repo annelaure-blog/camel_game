@@ -35,6 +35,12 @@ const dialogueUI = new DialogueUI({
   gameElement,
 });
 
+function hideAllDialogues() {
+  Object.keys(dialogueElements).forEach((speaker) => {
+    dialogueUI.hide(speaker);
+  });
+}
+
 const inventoryDisplay = document.getElementById('inventory-items');
 const inventory = new Inventory({ displayElement: inventoryDisplay });
 
@@ -52,6 +58,9 @@ const context = {
   ui: dialogueUI,
   getText,
   worldEvents: null,
+  transitions: {
+    schedulePostDesertSequence,
+  },
   elements: {
     game: gameElement,
     bucket,
@@ -112,12 +121,6 @@ function setupInitialGreeting() {
   }
 
   let greetingShown = false;
-
-  const hideAllDialogues = () => {
-    Object.keys(dialogueElements).forEach((speaker) => {
-      dialogueUI.hide(speaker);
-    });
-  };
 
   const playInitialSequence = () => {
     if (greetingShown) {
