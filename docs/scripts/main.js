@@ -94,6 +94,34 @@ const introInstructionsElement = document.getElementById('intro-instructions');
 let postDesertSequenceScheduled = false;
 let postDesertSequenceTimeoutId = null;
 let postDesertSequenceStarted = false;
+let isInteractionLocked = false;
+let cancelInitialGreetingSequence = null;
+
+const lockInteractions = () => {
+  if (isInteractionLocked) {
+    return;
+  }
+  isInteractionLocked = true;
+  if (gameElement) {
+    gameElement.classList.add('is-interaction-locked');
+  }
+  if (menuElement) {
+    menuElement.classList.add('is-interaction-locked');
+  }
+};
+
+const unlockInteractions = () => {
+  if (!isInteractionLocked) {
+    return;
+  }
+  isInteractionLocked = false;
+  if (gameElement) {
+    gameElement.classList.remove('is-interaction-locked');
+  }
+  if (menuElement) {
+    menuElement.classList.remove('is-interaction-locked');
+  }
+};
 
 loadScene('desert');
 
@@ -132,7 +160,7 @@ const context = {
 };
 
 const handleInteraction = (verb, target) => {
-  if (!verb) {
+  if (!verb || isInteractionLocked) {
     return;
   }
   const wasHandled = runInteraction({ verb, target, context });
@@ -152,6 +180,9 @@ context.worldEvents = worldEvents;
 
 verbs.forEach((verbElement) => {
   verbElement.addEventListener('click', () => {
+    if (isInteractionLocked) {
+      return;
+    }
     verbs.forEach((item) => item.classList.remove('active'));
     verbElement.classList.add('active');
     selectedVerb = verbElement.dataset.verb;
@@ -160,6 +191,9 @@ verbs.forEach((verbElement) => {
 
 if (sceneRootElement) {
   sceneRootElement.addEventListener('click', (event) => {
+    if (isInteractionLocked) {
+      return;
+    }
     const label = event.target.closest('.label');
     if (!label || !sceneRootElement.contains(label)) {
       return;
@@ -186,13 +220,54 @@ function setupInitialGreeting() {
     return;
   }
 
+  if (typeof cancelInitialGreetingSequence === 'function') {
+    cancelInitialGreetingSequence();
+  }
+
+  lockInteractions();
+
   let greetingShown = false;
+  let greetingActive = false;
+  const scheduledTimeouts = new Set();
+
+  const clearScheduledTimeouts = () => {
+    scheduledTimeouts.forEach((timeoutId) => {
+      window.clearTimeout(timeoutId);
+    });
+    scheduledTimeouts.clear();
+  };
+
+  const scheduleTimeout = (callback, delay) => {
+    const id = window.setTimeout(() => {
+      scheduledTimeouts.delete(id);
+      callback();
+    }, delay);
+    scheduledTimeouts.add(id);
+    return id;
+  };
+
+  const finalizeSequence = () => {
+    if (!greetingActive) {
+      clearScheduledTimeouts();
+      hideAllDialogues();
+      unlockInteractions();
+      cancelInitialGreetingSequence = null;
+      return;
+    }
+
+    greetingActive = false;
+    clearScheduledTimeouts();
+    hideAllDialogues();
+    unlockInteractions();
+    cancelInitialGreetingSequence = null;
+  };
 
   const playInitialSequence = () => {
     if (greetingShown) {
       return;
     }
     greetingShown = true;
+    greetingActive = true;
 
     const sequence = [
       { speaker: 'me', text: 'Hello!' },
@@ -224,7 +299,7 @@ function setupInitialGreeting() {
     sequence.forEach((step) => {
       const duration = step.duration ?? 3000;
 
-      setTimeout(() => {
+      scheduleTimeout(() => {
         hideAllDialogues();
 
         if (step.speaker) {
@@ -239,14 +314,20 @@ function setupInitialGreeting() {
       accumulatedDelay += duration;
     });
 
-    setTimeout(() => {
-      hideAllDialogues();
+    scheduleTimeout(() => {
+      finalizeSequence();
     }, accumulatedDelay);
+  };
+
+  cancelInitialGreetingSequence = () => {
+    greetingShown = true;
+    meElement.removeEventListener('animationend', playInitialSequence);
+    finalizeSequence();
   };
 
   meElement.addEventListener('animationend', playInitialSequence, { once: true });
 
-  setTimeout(() => {
+  scheduleTimeout(() => {
     playInitialSequence();
   }, 6500);
 }
@@ -298,6 +379,9 @@ function startPostDesertSequence() {
   }
 
   postDesertSequenceStarted = true;
+  if (typeof cancelInitialGreetingSequence === 'function') {
+    cancelInitialGreetingSequence();
+  }
   hideAllDialogues();
 
   runSceneTransitionSequence({
@@ -397,6 +481,9 @@ document.addEventListener('scene:transitioned', (event) => {
     return;
   }
 
+  if (typeof cancelInitialGreetingSequence === 'function') {
+    cancelInitialGreetingSequence();
+  }
   loadScene('tea');
   hideAllDialogues();
   clearSelectedVerb();
@@ -409,3 +496,17 @@ runIntroSequence(() => {
 });
 
 document.addEventListener('keydown', handleSkipKey);
+
+if (inventoryDisplay) {
+  inventoryDisplay.addEventListener(
+    'click',
+    (event) => {
+      if (!isInteractionLocked) {
+        return;
+      }
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    },
+    true,
+  );
+}

@@ -85,6 +85,8 @@ body {
   box-sizing: border-box;
   overflow-wrap: anywhere;
   text-align: center;
+  transform: translate(-50%, -50%);
+  transform-origin: center;
 }
 
 .label {
@@ -110,6 +112,8 @@ body {
   padding: 0.5rem 0.75rem;
   overflow-wrap: anywhere;
   text-align: center;
+  transform: translate(-50%, -50%);
+  transform-origin: center;
 }
 
 .label--character {
@@ -133,7 +137,7 @@ body {
   left: 40%;
   animation: dashPath 6s ease-in-out forwards;
   z-index: 3;
-  transform: scale(0.3);
+  transform: translate(-50%, -50%) scale(0.3);
   transform-origin: center bottom;
 }
 
@@ -155,26 +159,31 @@ body {
   0% {
     left: 40%;
     top: 5%;
-    transform: scale(0.3);
+    transform: translate(-50%, -50%) scale(0.3);
   }
 
   25% {
     left: 48%;
     top: 20%;
-    transform: scale(0.4);
+    transform: translate(-50%, -50%) scale(0.4);
   }
 
   50% {
     left: 55%;
     top: 40%;
-    transform: scale(0.6);
+    transform: translate(-50%, -50%) scale(0.6);
   }
 
   100% {
     left: 62%;
     top: 56%;
-    transform: scale(0.8);
+    transform: translate(-50%, -50%) scale(0.8);
   }
+}
+
+#game.is-interaction-locked,
+#menu.is-interaction-locked {
+  pointer-events: none;
 }
 
 .dialogue-box {
