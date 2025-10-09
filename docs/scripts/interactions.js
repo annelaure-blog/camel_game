@@ -1,0 +1,246 @@
+import { getText } from './texts.js';
+
+export const interactions = [
+  {
+    verb: 'talk',
+    target: 'bedouins',
+    conditions: [],
+    dialogues: {
+      awaitingWater: { speaker: 'bedouins', textKey: 'interactions.talk.bedouins.awaitingWater', duration: 5000 },
+      awaitingWaterWithDates: { speaker: 'bedouins', textKey: 'interactions.talk.bedouins.awaitingWaterWithDates', duration: 5500 },
+      awaitingDates: { speaker: 'bedouins', textKey: 'interactions.talk.bedouins.awaitingDates', duration: 6000 },
+      gratitude: { speaker: 'bedouins', textKey: 'interactions.talk.bedouins.gratitude', duration: 6500 },
+    },
+    action: ({ worldEvents }) => {
+      const hasWater = worldEvents.hasGivenWater();
+      const hasDates = worldEvents.hasReceivedDates();
+
+      if (hasWater && hasDates) {
+        return 'gratitude';
+      }
+
+      if (hasWater) {
+        return 'awaitingDates';
+      }
+
+      if (hasDates) {
+        return 'awaitingWaterWithDates';
+      }
+
+      return 'awaitingWater';
+    },
+  },
+  {
+    verb: 'talk',
+    target: 'camel',
+    conditions: [],
+    dialogues: {
+      curious: { speaker: 'camel', textKey: 'interactions.talk.camel.curious', duration: 5000 },
+      sensesWater: { speaker: 'camel', textKey: 'interactions.talk.camel.sensesWater', duration: 5000 },
+      hopeful: { speaker: 'camel', textKey: 'interactions.talk.camel.hopeful', duration: 5500 },
+    },
+    action: ({ inventory, worldEvents }) => {
+      if (worldEvents.hasGivenWater() && worldEvents.hasReceivedDates()) {
+        return 'hopeful';
+      }
+
+      if (inventory.has('bucket of water')) {
+        return 'sensesWater';
+      }
+
+      return 'curious';
+    },
+  },
+  {
+    verb: 'shake',
+    target: 'palm tree',
+    conditions: [],
+    dialogues: {
+      noEffect: { speaker: 'me', textKey: 'interactions.shake.palmTree.noEffect', duration: 2500 },
+    },
+    action: ({ worldEvents }) => {
+      worldEvents.shakePalmTree();
+      return 'noEffect';
+    },
+  },
+  {
+    verb: 'pickup',
+    target: 'bucket',
+    conditions: [
+      {
+        check: ({ inventory }) => !inventory.has('bucket'),
+        failDialogueKey: 'already',
+      },
+      {
+        check: ({ elements }) => elements.bucket && elements.game.contains(elements.bucket),
+        failDialogueKey: 'missing',
+      },
+    ],
+    dialogues: {
+      success: { speaker: 'me', textKey: 'interactions.pickup.bucket.success' },
+      missing: { speaker: 'me', textKey: 'interactions.pickup.bucket.missing' },
+      already: { speaker: 'me', textKey: 'interactions.pickup.bucket.already' },
+    },
+    action: ({ elements, inventory }) => {
+      if (elements.bucket && elements.game.contains(elements.bucket)) {
+        elements.game.removeChild(elements.bucket);
+      }
+      inventory.add('bucket');
+      inventory.clearSelection();
+      return 'success';
+    },
+  },
+  {
+    verb: 'pickup',
+    target: 'dates',
+    conditions: [
+      {
+        check: ({ worldEvents }) => worldEvents.hasDatesOnGround(),
+        failDialogueKey: 'missing',
+      },
+    ],
+    dialogues: {
+      success: { speaker: 'me', textKey: 'interactions.pickup.dates.success' },
+      missing: { speaker: 'me', textKey: 'interactions.pickup.dates.missing' },
+    },
+    action: ({ worldEvents, inventory }) => {
+      if (worldEvents.collectDates()) {
+        inventory.add('dates');
+        inventory.clearSelection();
+        return 'success';
+      }
+      return null;
+    },
+  },
+  {
+    verb: 'use',
+    target: 'pond',
+    conditions: [
+      {
+        check: ({ inventory }) => !inventory.has('bucket of water'),
+        failDialogueKey: 'alreadyFull',
+      },
+      {
+        check: ({ inventory }) => inventory.has('bucket'),
+        failDialogueKey: 'missingBucket',
+      },
+    ],
+    dialogues: {
+      success: { speaker: 'me', textKey: 'interactions.use.pond.success' },
+      missingBucket: { speaker: 'me', textKey: 'interactions.use.pond.missingBucket' },
+      alreadyFull: { speaker: 'me', textKey: 'interactions.use.pond.alreadyFull' },
+    },
+    action: ({ inventory }) => {
+      inventory.remove('bucket');
+      inventory.add('bucket of water');
+      inventory.clearSelection();
+      return 'success';
+    },
+  },
+  {
+    verb: 'give',
+    target: 'bedouins',
+    conditions: [
+      {
+        check: ({ inventory }) => Boolean(inventory.getSelectedItem()),
+        failDialogueKey: 'nothingSelected',
+      },
+    ],
+    dialogues: {
+      nothingSelected: { speaker: 'me', textKey: 'interactions.give.bedouins.nothingSelected' },
+      wrongItem: { speaker: 'bedouins', textKey: 'interactions.give.bedouins.wrongItem' },
+      datesBeforeWater: { speaker: 'bedouins', textKey: 'interactions.give.bedouins.datesBeforeWater' },
+      datesAfterWater: { speaker: 'bedouins', textKey: 'interactions.give.bedouins.datesAfterWater', duration: 12000 },
+      water: { speaker: 'bedouins', textKey: 'interactions.give.bedouins.water' },
+    },
+    action: ({ inventory, worldEvents }) => {
+      const selectedItem = inventory.getSelectedItem();
+      if (!selectedItem) {
+        return 'nothingSelected';
+      }
+
+      if (selectedItem === 'dates') {
+        inventory.remove('dates');
+        inventory.clearSelection();
+        if (typeof worldEvents.markDatesDelivered === 'function') {
+          worldEvents.markDatesDelivered();
+        }
+        if (worldEvents.hasGivenWater()) {
+          return 'datesAfterWater';
+        }
+        return 'datesBeforeWater';
+      }
+
+      if (selectedItem === 'bucket of water') {
+        inventory.remove('bucket of water');
+        inventory.clearSelection();
+        worldEvents.markWaterDelivered();
+        return 'water';
+      }
+
+      inventory.clearSelection();
+      return 'wrongItem';
+    },
+  },
+];
+
+function playDialogue(context, config, overrides = {}) {
+  if (!context.ui || !config) {
+    return;
+  }
+
+  const resolveText = context.getText || getText;
+  const text = overrides.text || resolveText(config.textKey);
+  const duration = overrides.duration || config.duration || 3500;
+  const isThought = overrides.isThought != null ? overrides.isThought : config.isThought || false;
+
+  context.ui.show({
+    speaker: config.speaker,
+    text,
+    isThought,
+    duration,
+  });
+}
+
+export function runInteraction({ verb, target, context }) {
+  const interaction = interactions.find((entry) => entry.verb === verb && entry.target === target);
+  if (!interaction) {
+    return false;
+  }
+
+  const conditions = interaction.conditions || [];
+  for (const condition of conditions) {
+    const passed = condition.check ? condition.check(context) : true;
+    if (!passed) {
+      if (condition.failDialogueKey && interaction.dialogues?.[condition.failDialogueKey]) {
+        playDialogue(context, interaction.dialogues[condition.failDialogueKey]);
+      }
+      return false;
+    }
+  }
+
+  const result = interaction.action(context);
+  if (!result) {
+    return true;
+  }
+
+  const outcome = typeof result === 'string' ? { dialogueKey: result } : result;
+  if (outcome.dialogueKey && interaction.dialogues?.[outcome.dialogueKey]) {
+    const dialogueConfig = interaction.dialogues[outcome.dialogueKey];
+    const duration = outcome.duration || dialogueConfig.duration || 3500;
+    const durationMs = Number(duration) || 0;
+
+    playDialogue(context, dialogueConfig, outcome);
+
+    if (
+      interaction.verb === 'talk' &&
+      interaction.target === 'bedouins' &&
+      outcome.dialogueKey === 'gratitude' &&
+      context.transitions?.schedulePostDesertSequence
+    ) {
+      context.transitions.schedulePostDesertSequence(durationMs + 500);
+    }
+  }
+
+  return true;
+}
