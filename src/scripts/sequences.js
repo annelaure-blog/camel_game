@@ -1,5 +1,21 @@
 let activeSequenceController = null;
 
+function isSkipEvent(event) {
+  if (!event) {
+    return false;
+  }
+
+  if (event.code === 'Space') {
+    return true;
+  }
+
+  if (event.key === ' ' || event.key === 'Spacebar') {
+    return true;
+  }
+
+  return false;
+}
+
 function normalizeSentences(sentences) {
   if (!Array.isArray(sentences)) {
     return [sentences].filter(Boolean);
@@ -55,16 +71,17 @@ export function playPauseableTextSequence({
   const state = {
     currentIndex: 0,
     timerId: null,
-    isPaused: false,
     remainingTime: Math.max(0, Number(sentenceDuration) || 0),
     lastTick: 0,
   };
+
+  let isFinalized = false;
 
   const updateInstructions = () => {
     if (!instructionsElement) {
       return;
     }
-    instructionsElement.textContent = state.isPaused ? 'Press space to resume' : 'Press space to pause';
+    instructionsElement.textContent = 'Press space to skip';
   };
 
   const clearTimer = () => {
@@ -75,6 +92,11 @@ export function playPauseableTextSequence({
   };
 
   const finalize = ({ skipCallbacks = false } = {}) => {
+    if (isFinalized) {
+      return;
+    }
+
+    isFinalized = true;
     clearTimer();
     document.removeEventListener('keydown', handleSpaceToggle);
 
@@ -137,44 +159,16 @@ export function playPauseableTextSequence({
   const renderCurrentSentence = () => {
     toggleVisibility(containerElement, false);
     textElement.textContent = normalizedSentences[state.currentIndex];
-    state.isPaused = false;
     updateInstructions();
-  };
-
-  const pauseSequence = () => {
-    if (state.isPaused || state.timerId === null) {
-      return;
-    }
-
-    const elapsed = Date.now() - state.lastTick;
-    state.remainingTime = Math.max(0, state.remainingTime - elapsed);
-    clearTimer();
-    state.isPaused = true;
-    updateInstructions();
-  };
-
-  const resumeSequence = () => {
-    if (!state.isPaused) {
-      return;
-    }
-
-    state.isPaused = false;
-    updateInstructions();
-    scheduleNextTick(state.remainingTime);
   };
 
   const handleSpaceToggle = (event) => {
-    if (event.code !== 'Space' && event.key !== ' ' && event.key !== 'Spacebar') {
+    if (!isSkipEvent(event)) {
       return;
     }
 
     event.preventDefault();
-
-    if (state.isPaused) {
-      resumeSequence();
-    } else {
-      pauseSequence();
-    }
+    finalize();
   };
 
   const controller = {
@@ -191,4 +185,13 @@ export function playPauseableTextSequence({
   scheduleNextTick(sentenceDuration);
 
   return controller;
+}
+
+export function skipActiveSequence() {
+  if (activeSequenceController?.teardown) {
+    activeSequenceController.teardown();
+    return true;
+  }
+
+  return false;
 }

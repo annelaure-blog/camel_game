@@ -238,6 +238,7 @@ body {
   flex: 0 0 80px;
   gap: 0.75rem;
   font-size: clamp(0.95rem, 0.7vw + 0.55rem, 1.1rem);
+  position: relative;
 }
 
 .verb {
@@ -253,6 +254,18 @@ body {
 .verb.active {
   background: black;
   color: white;
+}
+
+.verb-toolbar__hint {
+  position: absolute;
+  right: 1rem;
+  bottom: 0.5rem;
+  font-size: clamp(0.7rem, 0.45vw + 0.5rem, 0.9rem);
+  text-transform: uppercase;
+  color: #4c3f2a;
+  letter-spacing: 0.08em;
+  pointer-events: none;
+  white-space: nowrap;
 }
 
 .inventory-item {
