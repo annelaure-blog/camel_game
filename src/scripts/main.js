@@ -21,6 +21,11 @@ const bucket = document.querySelector('[data-name="bucket"]');
 const palmTree = document.querySelector('[data-name="palm tree"]');
 const pond = document.querySelector('[data-name="pond"]');
 const gameElement = document.getElementById('game');
+const menuElement = document.getElementById('menu');
+
+const introSequenceElement = document.getElementById('intro-sequence');
+const introTextElement = document.getElementById('intro-text');
+const introInstructionsElement = document.getElementById('intro-instructions');
 
 renderSceneLayout(gameElement);
 
@@ -177,4 +182,130 @@ function setupInitialGreeting() {
   }, 6500);
 }
 
-initializeGame();
+function runIntroSequence(onComplete) {
+  if (!introSequenceElement || !introTextElement || !introInstructionsElement) {
+    if (typeof onComplete === 'function') {
+      onComplete();
+    }
+    return;
+  }
+
+  const sentences = [
+    'Once upon a time,...',
+    'Placeholder text to be continued.',
+  ];
+
+  const sentenceDuration = 3000;
+  let currentIndex = 0;
+  let timerId = null;
+  let isPaused = false;
+  let remainingTime = sentenceDuration;
+  let lastTick = 0;
+
+  const updateInstructions = () => {
+    introInstructionsElement.textContent = isPaused
+      ? 'Press space to resume'
+      : 'Press space to pause';
+  };
+
+  const cleanup = () => {
+    if (timerId !== null) {
+      window.clearTimeout(timerId);
+      timerId = null;
+    }
+    document.removeEventListener('keydown', handleSpaceToggle);
+  };
+
+  const endSequence = () => {
+    cleanup();
+    introSequenceElement.classList.add('is-hidden');
+    introTextElement.textContent = '';
+    introInstructionsElement.textContent = '';
+    if (gameElement) {
+      gameElement.classList.remove('is-hidden');
+    }
+    if (menuElement) {
+      menuElement.classList.remove('is-hidden');
+    }
+    if (typeof onComplete === 'function') {
+      onComplete();
+    }
+  };
+
+  const showSentence = () => {
+    if (currentIndex >= sentences.length) {
+      endSequence();
+      return;
+    }
+
+    introTextElement.textContent = sentences[currentIndex];
+    isPaused = false;
+    remainingTime = sentenceDuration;
+    lastTick = Date.now();
+    updateInstructions();
+
+    timerId = window.setTimeout(() => {
+      currentIndex += 1;
+      showSentence();
+    }, sentenceDuration);
+  };
+
+  const pauseSequence = () => {
+    if (isPaused) {
+      return;
+    }
+
+    const now = Date.now();
+    remainingTime = Math.max(0, remainingTime - (now - lastTick));
+    if (timerId !== null) {
+      window.clearTimeout(timerId);
+      timerId = null;
+    }
+
+    isPaused = true;
+    updateInstructions();
+  };
+
+  const resumeSequence = () => {
+    if (!isPaused) {
+      return;
+    }
+
+    isPaused = false;
+    updateInstructions();
+
+    if (remainingTime <= 0) {
+      currentIndex += 1;
+      showSentence();
+      return;
+    }
+
+    lastTick = Date.now();
+    timerId = window.setTimeout(() => {
+      currentIndex += 1;
+      showSentence();
+    }, remainingTime);
+  };
+
+  function handleSpaceToggle(event) {
+    if (event.code !== 'Space') {
+      return;
+    }
+
+    event.preventDefault();
+
+    if (isPaused) {
+      resumeSequence();
+    } else {
+      pauseSequence();
+    }
+  }
+
+  document.addEventListener('keydown', handleSpaceToggle);
+
+  showSentence();
+}
+
+runIntroSequence(() => {
+  initializeGame();
+});
