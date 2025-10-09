@@ -4,7 +4,7 @@ import { runInteraction } from './interactions.js';
 import { WorldEvents } from './world-events.js';
 import { renderSceneLayout } from './layout.js';
 import { getText } from './texts.js';
-import { playPauseableTextSequence } from './sequences.js';
+import { playPauseableTextSequence, skipActiveSequence } from './sequences.js';
 
 const dialogueElements = {
   me: document.getElementById('dialogue-me'),
@@ -29,6 +29,7 @@ const introTextElement = document.getElementById('intro-text');
 const introInstructionsElement = document.getElementById('intro-instructions');
 let postDesertSequenceScheduled = false;
 let postDesertSequenceTimeoutId = null;
+let postDesertSequenceStarted = false;
 
 renderSceneLayout(gameElement);
 
@@ -217,7 +218,8 @@ function runSceneTransitionSequence({ onComplete } = {}) {
     hideMenuOnStart: true,
     showGameOnComplete: false,
     showMenuOnComplete: false,
-    hideContainerOnComplete: false,
+    hideContainerOnComplete: true,
+    sentenceDuration: 4000,
     elements: {
       container: introSequenceElement,
       text: introTextElement,
@@ -228,8 +230,27 @@ function runSceneTransitionSequence({ onComplete } = {}) {
   });
 }
 
+function startPostDesertSequence() {
+  if (postDesertSequenceStarted) {
+    return;
+  }
+
+  postDesertSequenceStarted = true;
+  hideAllDialogues();
+
+  runSceneTransitionSequence({
+    onComplete: () => {
+      document.dispatchEvent(
+        new CustomEvent('scene:transitioned', {
+          detail: { name: 'post-desert' },
+        }),
+      );
+    },
+  });
+}
+
 function schedulePostDesertSequence(delay = 0) {
-  if (postDesertSequenceScheduled) {
+  if (postDesertSequenceStarted) {
     return;
   }
 
@@ -237,146 +258,79 @@ function schedulePostDesertSequence(delay = 0) {
 
   if (postDesertSequenceTimeoutId) {
     window.clearTimeout(postDesertSequenceTimeoutId);
+    postDesertSequenceTimeoutId = null;
   }
 
   const safeDelay = Math.max(0, Number(delay) || 0);
 
-  postDesertSequenceTimeoutId = window.setTimeout(() => {
-    postDesertSequenceTimeoutId = null;
-    hideAllDialogues();
-    runSceneTransitionSequence({
-      onComplete: () => {
-        document.dispatchEvent(
-          new CustomEvent('scene:transitioned', {
-            detail: { name: 'post-desert' },
-          }),
-        );
-      },
-    });
-  }, safeDelay);
-  if (!introSequenceElement || !introTextElement || !introInstructionsElement) {
-    if (typeof onComplete === 'function') {
-      onComplete();
-    }
+  if (safeDelay === 0) {
+    startPostDesertSequence();
     return;
   }
 
-  const sentences = [
-    'Once upon a time,...',
-    'Placeholder text to be continued.',
-  ];
+  postDesertSequenceTimeoutId = window.setTimeout(() => {
+    postDesertSequenceTimeoutId = null;
+    startPostDesertSequence();
+  }, safeDelay);
+}
 
-  const sentenceDuration = 3000;
-  let currentIndex = 0;
-  let timerId = null;
-  let isPaused = false;
-  let remainingTime = sentenceDuration;
-  let lastTick = 0;
-
-  const updateInstructions = () => {
-    introInstructionsElement.textContent = isPaused
-      ? 'Press space to resume'
-      : 'Press space to pause';
-  };
-
-  const cleanup = () => {
-    if (timerId !== null) {
-      window.clearTimeout(timerId);
-      timerId = null;
-    }
-    document.removeEventListener('keydown', handleSpaceToggle);
-  };
-
-  const endSequence = () => {
-    cleanup();
-    introSequenceElement.classList.add('is-hidden');
-    introTextElement.textContent = '';
-    introInstructionsElement.textContent = '';
-    if (gameElement) {
-      gameElement.classList.remove('is-hidden');
-    }
-    if (menuElement) {
-      menuElement.classList.remove('is-hidden');
-    }
-    if (typeof onComplete === 'function') {
-      onComplete();
-    }
-  };
-
-  const showSentence = () => {
-    if (currentIndex >= sentences.length) {
-      endSequence();
-      return;
-    }
-
-    introTextElement.textContent = sentences[currentIndex];
-    isPaused = false;
-    remainingTime = sentenceDuration;
-    lastTick = Date.now();
-    updateInstructions();
-
-    timerId = window.setTimeout(() => {
-      currentIndex += 1;
-      showSentence();
-    }, sentenceDuration);
-  };
-
-  const pauseSequence = () => {
-    if (isPaused) {
-      return;
-    }
-
-    const now = Date.now();
-    remainingTime = Math.max(0, remainingTime - (now - lastTick));
-    if (timerId !== null) {
-      window.clearTimeout(timerId);
-      timerId = null;
-    }
-
-    isPaused = true;
-    updateInstructions();
-  };
-
-  const resumeSequence = () => {
-    if (!isPaused) {
-      return;
-    }
-
-    isPaused = false;
-    updateInstructions();
-
-    if (remainingTime <= 0) {
-      currentIndex += 1;
-      showSentence();
-      return;
-    }
-
-    lastTick = Date.now();
-    timerId = window.setTimeout(() => {
-      currentIndex += 1;
-      showSentence();
-    }, remainingTime);
-  };
-
-  function handleSpaceToggle(event) {
-    if (event.code !== 'Space') {
-      return;
-    }
-
-    event.preventDefault();
-
-    if (isPaused) {
-      resumeSequence();
-    } else {
-      pauseSequence();
-    }
+function forcePostDesertSequence() {
+  if (postDesertSequenceStarted) {
+    return;
   }
 
-  document.addEventListener('keydown', handleSpaceToggle);
+  if (postDesertSequenceTimeoutId) {
+    window.clearTimeout(postDesertSequenceTimeoutId);
+    postDesertSequenceTimeoutId = null;
+  }
 
-  showSentence();
+  postDesertSequenceScheduled = true;
+  startPostDesertSequence();
+}
+
+function isSkipKey(event) {
+  if (!event) {
+    return false;
+  }
+
+  if (event.code === 'Space') {
+    return true;
+  }
+
+  if (event.key === ' ' || event.key === 'Spacebar') {
+    return true;
+  }
+
+  return false;
+}
+
+function handleSkipKey(event) {
+  if (!isSkipKey(event) || event.repeat) {
+    return;
+  }
+
+  if (skipActiveSequence()) {
+    event.preventDefault();
+    return;
+  }
+
+  const gameIsVisible = !gameElement.classList.contains('is-hidden');
+
+  if (!gameIsVisible) {
+    return;
+  }
+
+  event.preventDefault();
+
+  if (!postDesertSequenceScheduled) {
+    schedulePostDesertSequence();
+  }
+
+  forcePostDesertSequence();
 }
 
 runIntroSequence(() => {
   initializeGame();
 });
+
+document.addEventListener('keydown', handleSkipKey);

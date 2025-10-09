@@ -55,7 +55,7 @@ describe('playPauseableTextSequence', () => {
 
     expect(container.classList.contains('is-hidden')).toBe(false);
     expect(text.textContent).toBe('First');
-    expect(instructions.textContent).toBe('Press space to pause');
+    expect(instructions.textContent).toBe('Press space to skip');
     expect(game.classList.contains('is-hidden')).toBe(true);
     expect(menu.classList.contains('is-hidden')).toBe(true);
 
@@ -69,30 +69,32 @@ describe('playPauseableTextSequence', () => {
     expect(menu.classList.contains('is-hidden')).toBe(false);
   });
 
-  it('pauses and resumes when pressing space', () => {
+  it('skips the sequence when pressing space', () => {
     const { container, text, instructions, game, menu } = createElements();
+    const onComplete = vi.fn();
 
     playPauseableTextSequence({
       sentences: ['First', 'Second'],
       sentenceDuration: 1000,
+      onComplete,
+      hideGameOnStart: true,
+      showGameOnComplete: true,
+      hideMenuOnStart: true,
+      showMenuOnComplete: true,
       elements: { container, text, instructions, game, menu },
     });
 
-    vi.advanceTimersByTime(400);
+    expect(container.classList.contains('is-hidden')).toBe(false);
+    expect(text.textContent).toBe('First');
 
     const spaceEvent = new KeyboardEvent('keydown', { code: 'Space' });
     document.dispatchEvent(spaceEvent);
 
-    expect(instructions.textContent).toBe('Press space to resume');
-
-    vi.advanceTimersByTime(1000);
-    expect(text.textContent).toBe('First');
-
-    document.dispatchEvent(spaceEvent);
-    expect(instructions.textContent).toBe('Press space to pause');
-
-    vi.advanceTimersByTime(600);
-    expect(text.textContent).toBe('Second');
+    expect(onComplete).toHaveBeenCalledTimes(1);
+    expect(container.classList.contains('is-hidden')).toBe(true);
+    expect(instructions.textContent).toBe('');
+    expect(game.classList.contains('is-hidden')).toBe(false);
+    expect(menu.classList.contains('is-hidden')).toBe(false);
   });
 
   it('immediately finalizes when no sentences provided', () => {
