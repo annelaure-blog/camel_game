@@ -25,7 +25,7 @@ const sceneLayout = {
       layer: 4,
     },
     carpet: {
-      position: { default: { x: 0.18, y: 0.52 } },
+      position: { default: { x: 0.24, y: 0.58 } },
       size: {
         width: '350px',
         height: '250px',

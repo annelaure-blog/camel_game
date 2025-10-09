@@ -4,6 +4,7 @@ import { runInteraction } from './interactions.js';
 import { WorldEvents } from './world-events.js';
 import { renderSceneLayout } from './layout.js';
 import { getText } from './texts.js';
+import { playPauseableTextSequence } from './sequences.js';
 
 const dialogueElements = {
   me: document.getElementById('dialogue-me'),
@@ -21,6 +22,13 @@ const bucket = document.querySelector('[data-name="bucket"]');
 const palmTree = document.querySelector('[data-name="palm tree"]');
 const pond = document.querySelector('[data-name="pond"]');
 const gameElement = document.getElementById('game');
+const menuElement = document.getElementById('menu');
+
+const introSequenceElement = document.getElementById('intro-sequence');
+const introTextElement = document.getElementById('intro-text');
+const introInstructionsElement = document.getElementById('intro-instructions');
+let postDesertSequenceScheduled = false;
+let postDesertSequenceTimeoutId = null;
 
 renderSceneLayout(gameElement);
 
@@ -29,6 +37,12 @@ const dialogueUI = new DialogueUI({
   actorElements,
   gameElement,
 });
+
+function hideAllDialogues() {
+  Object.keys(dialogueElements).forEach((speaker) => {
+    dialogueUI.hide(speaker);
+  });
+}
 
 const inventoryDisplay = document.getElementById('inventory-items');
 const inventory = new Inventory({ displayElement: inventoryDisplay });
@@ -47,6 +61,9 @@ const context = {
   ui: dialogueUI,
   getText,
   worldEvents: null,
+  transitions: {
+    schedulePostDesertSequence,
+  },
   elements: {
     game: gameElement,
     bucket,
@@ -107,12 +124,6 @@ function setupInitialGreeting() {
   }
 
   let greetingShown = false;
-
-  const hideAllDialogues = () => {
-    Object.keys(dialogueElements).forEach((speaker) => {
-      dialogueUI.hide(speaker);
-    });
-  };
 
   const playInitialSequence = () => {
     if (greetingShown) {
@@ -177,4 +188,74 @@ function setupInitialGreeting() {
   }, 6500);
 }
 
-initializeGame();
+function runIntroSequence(onComplete) {
+  hideAllDialogues();
+  playPauseableTextSequence({
+    sentences: ['Once upon a time,...', 'Placeholder text to be continued.'],
+    onComplete,
+    hideGameOnStart: true,
+    hideMenuOnStart: true,
+    showGameOnComplete: true,
+    showMenuOnComplete: true,
+    hideContainerOnComplete: true,
+    elements: {
+      container: introSequenceElement,
+      text: introTextElement,
+      instructions: introInstructionsElement,
+      game: gameElement,
+      menu: menuElement,
+    },
+  });
+}
+
+function runSceneTransitionSequence({ onComplete } = {}) {
+  hideAllDialogues();
+  playPauseableTextSequence({
+    sentences: ['A moment later'],
+    onComplete,
+    hideGameOnStart: true,
+    hideMenuOnStart: true,
+    showGameOnComplete: false,
+    showMenuOnComplete: false,
+    hideContainerOnComplete: false,
+    elements: {
+      container: introSequenceElement,
+      text: introTextElement,
+      instructions: introInstructionsElement,
+      game: gameElement,
+      menu: menuElement,
+    },
+  });
+}
+
+function schedulePostDesertSequence(delay = 0) {
+  if (postDesertSequenceScheduled) {
+    return;
+  }
+
+  postDesertSequenceScheduled = true;
+
+  if (postDesertSequenceTimeoutId) {
+    window.clearTimeout(postDesertSequenceTimeoutId);
+  }
+
+  const safeDelay = Math.max(0, Number(delay) || 0);
+
+  postDesertSequenceTimeoutId = window.setTimeout(() => {
+    postDesertSequenceTimeoutId = null;
+    hideAllDialogues();
+    runSceneTransitionSequence({
+      onComplete: () => {
+        document.dispatchEvent(
+          new CustomEvent('scene:transitioned', {
+            detail: { name: 'post-desert' },
+          }),
+        );
+      },
+    });
+  }, safeDelay);
+}
+
+runIntroSequence(() => {
+  initializeGame();
+});

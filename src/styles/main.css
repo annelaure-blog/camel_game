@@ -8,6 +8,42 @@ body {
   flex-direction: column;
 }
 
+.is-hidden {
+  display: none !important;
+}
+
+.intro-sequence {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+  gap: 2rem;
+  z-index: 1000;
+}
+
+.intro-sequence__text {
+  font-size: clamp(1.5rem, 2vw + 1rem, 2.75rem);
+  line-height: 1.4;
+  max-width: min(800px, 90vw);
+}
+
+.intro-sequence__instructions {
+  position: absolute;
+  bottom: 2rem;
+  width: 100%;
+  text-align: center;
+  font-size: clamp(0.9rem, 1vw + 0.4rem, 1.3rem);
+  color: rgba(255, 255, 255, 0.75);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 #game {
   position: relative;
   flex: 1 1 auto;
