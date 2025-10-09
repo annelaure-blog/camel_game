@@ -87,6 +87,8 @@ body {
   box-sizing: border-box;
   overflow-wrap: anywhere;
   text-align: center;
+  transform: translate(-50%, -50%);
+  transform-origin: center;
 }
 
 .label {
@@ -114,6 +116,8 @@ body {
   padding: 0.5rem 0.75rem;
   overflow-wrap: anywhere;
   text-align: center;
+  transform: translate(-50%, -50%);
+  transform-origin: center;
 }
 
 .label--character {
@@ -179,6 +183,11 @@ body {
     top: 56%;
     transform: translate(-50%, -50%) scale(0.8);
   }
+}
+
+#game.is-interaction-locked,
+#menu.is-interaction-locked {
+  pointer-events: none;
 }
 
 .dialogue-box {
