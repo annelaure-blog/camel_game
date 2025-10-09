@@ -27,10 +27,6 @@ const introSequenceElement = document.getElementById('intro-sequence');
 const introTextElement = document.getElementById('intro-text');
 const introInstructionsElement = document.getElementById('intro-instructions');
 
-let activeSequenceController = null;
-let postDesertSequenceScheduled = false;
-let postDesertSequenceTimeoutId = null;
-
 renderSceneLayout(gameElement);
 
 const dialogueUI = new DialogueUI({
@@ -189,16 +185,7 @@ function setupInitialGreeting() {
   }, 6500);
 }
 
-function playPauseableTextSequence({
-  sentences,
-  onComplete,
-  hideGameOnStart = false,
-  hideMenuOnStart = false,
-  showGameOnComplete = false,
-  showMenuOnComplete = false,
-  hideContainerOnComplete = true,
-  sentenceDuration = 3000,
-} = {}) {
+function runIntroSequence(onComplete) {
   if (!introSequenceElement || !introTextElement || !introInstructionsElement) {
     if (typeof onComplete === 'function') {
       onComplete();
@@ -206,53 +193,101 @@ function playPauseableTextSequence({
     return;
   }
 
-  const normalizedSentences = Array.isArray(sentences)
-    ? sentences.filter((sentence) => Boolean(sentence))
-    : [sentences].filter((sentence) => Boolean(sentence));
+  const sentences = [
+    'Once upon a time,...',
+    'Placeholder text to be continued.',
+  ];
 
-  if (normalizedSentences.length === 0) {
-    if (typeof onComplete === 'function') {
-      onComplete();
-    }
-    return;
-  }
-
-  if (activeSequenceController?.teardown) {
-    activeSequenceController.teardown({ skipCallbacks: true });
-  }
-
-  if (hideGameOnStart && gameElement) {
-    gameElement.classList.add('is-hidden');
-  }
-
-  if (hideMenuOnStart && menuElement) {
-    menuElement.classList.add('is-hidden');
-  }
-
-  hideAllDialogues();
-
-  const defaultDuration = Math.max(0, Number(sentenceDuration) || 0);
-  const lastSentence = normalizedSentences[normalizedSentences.length - 1];
-
-  const state = {
-    currentIndex: 0,
-    timerId: null,
-    isPaused: false,
-    remainingTime: defaultDuration,
-    lastTick: 0,
-  };
+  const sentenceDuration = 3000;
+  let currentIndex = 0;
+  let timerId = null;
+  let isPaused = false;
+  let remainingTime = sentenceDuration;
+  let lastTick = 0;
 
   const updateInstructions = () => {
-    introInstructionsElement.textContent = state.isPaused
+    introInstructionsElement.textContent = isPaused
       ? 'Press space to resume'
       : 'Press space to pause';
   };
 
-  const clearTimer = () => {
-    if (state.timerId !== null) {
-      window.clearTimeout(state.timerId);
-      state.timerId = null;
+  const cleanup = () => {
+    if (timerId !== null) {
+      window.clearTimeout(timerId);
+      timerId = null;
     }
+    document.removeEventListener('keydown', handleSpaceToggle);
+  };
+
+  const endSequence = () => {
+    cleanup();
+    introSequenceElement.classList.add('is-hidden');
+    introTextElement.textContent = '';
+    introInstructionsElement.textContent = '';
+    if (gameElement) {
+      gameElement.classList.remove('is-hidden');
+    }
+    if (menuElement) {
+      menuElement.classList.remove('is-hidden');
+    }
+    if (typeof onComplete === 'function') {
+      onComplete();
+    }
+  };
+
+  const showSentence = () => {
+    if (currentIndex >= sentences.length) {
+      endSequence();
+      return;
+    }
+
+    introTextElement.textContent = sentences[currentIndex];
+    isPaused = false;
+    remainingTime = sentenceDuration;
+    lastTick = Date.now();
+    updateInstructions();
+
+    timerId = window.setTimeout(() => {
+      currentIndex += 1;
+      showSentence();
+    }, sentenceDuration);
+  };
+
+  const pauseSequence = () => {
+    if (isPaused) {
+      return;
+    }
+
+    const now = Date.now();
+    remainingTime = Math.max(0, remainingTime - (now - lastTick));
+    if (timerId !== null) {
+      window.clearTimeout(timerId);
+      timerId = null;
+    }
+
+    isPaused = true;
+    updateInstructions();
+  };
+
+  const resumeSequence = () => {
+    if (!isPaused) {
+      return;
+    }
+
+    isPaused = false;
+    updateInstructions();
+
+    if (remainingTime <= 0) {
+      currentIndex += 1;
+      showSentence();
+      return;
+    }
+
+    lastTick = Date.now();
+    timerId = window.setTimeout(() => {
+      currentIndex += 1;
+      showSentence();
+    }, remainingTime);
   };
 
   function handleSpaceToggle(event) {
@@ -262,175 +297,16 @@ function playPauseableTextSequence({
 
     event.preventDefault();
 
-    if (state.isPaused) {
+    if (isPaused) {
       resumeSequence();
     } else {
       pauseSequence();
     }
   }
 
-  let controller = null;
-
-  const finalize = ({ skipCallbacks = false } = {}) => {
-    clearTimer();
-    document.removeEventListener('keydown', handleSpaceToggle);
-
-    introTextElement.textContent = hideContainerOnComplete ? '' : lastSentence;
-
-    if (hideContainerOnComplete) {
-      introSequenceElement.classList.add('is-hidden');
-      introInstructionsElement.textContent = '';
-    }
-
-    if (!hideContainerOnComplete) {
-      updateInstructions();
-    }
-
-    if (showGameOnComplete && gameElement) {
-      gameElement.classList.remove('is-hidden');
-    }
-
-    if (showMenuOnComplete && menuElement) {
-      menuElement.classList.remove('is-hidden');
-    }
-
-    if (activeSequenceController === controller) {
-      activeSequenceController = null;
-    }
-
-    if (!skipCallbacks && typeof onComplete === 'function') {
-      onComplete();
-    }
-  };
-
-  const showSentence = ({
-    nextDelay = defaultDuration,
-    advanceIndex = false,
-  } = {}) => {
-    if (advanceIndex) {
-      state.currentIndex += 1;
-    }
-
-    if (state.currentIndex >= normalizedSentences.length) {
-      finalize();
-      return;
-    }
-
-    introSequenceElement.classList.remove('is-hidden');
-    introTextElement.textContent = normalizedSentences[state.currentIndex];
-    state.isPaused = false;
-    state.remainingTime = Math.max(0, Number(nextDelay) || 0);
-    state.lastTick = Date.now();
-    updateInstructions();
-
-    const delay = state.remainingTime;
-
-    if (delay <= 0) {
-      showSentence({ advanceIndex: true });
-      return;
-    }
-
-    state.timerId = window.setTimeout(() => {
-      showSentence({ advanceIndex: true, nextDelay: defaultDuration });
-    }, delay);
-  };
-
-  const pauseSequence = () => {
-    if (state.isPaused) {
-      return;
-    }
-
-    const now = Date.now();
-    state.remainingTime = Math.max(0, state.remainingTime - (now - state.lastTick));
-    clearTimer();
-    state.isPaused = true;
-    updateInstructions();
-  };
-
-  const resumeSequence = () => {
-    if (!state.isPaused) {
-      return;
-    }
-
-    state.isPaused = false;
-    updateInstructions();
-
-    if (state.remainingTime <= 0) {
-      showSentence({ advanceIndex: true, nextDelay: defaultDuration });
-      return;
-    }
-
-    state.lastTick = Date.now();
-    state.timerId = window.setTimeout(() => {
-      showSentence({ advanceIndex: true, nextDelay: defaultDuration });
-    }, state.remainingTime);
-  };
-
-  controller = {
-    teardown: ({ skipCallbacks = false } = {}) => {
-      finalize({ skipCallbacks });
-    },
-  };
-
-  activeSequenceController = controller;
-
   document.addEventListener('keydown', handleSpaceToggle);
 
-  introSequenceElement.classList.remove('is-hidden');
-  updateInstructions();
   showSentence();
-}
-
-function runIntroSequence(onComplete) {
-  playPauseableTextSequence({
-    sentences: ['Once upon a time,...', 'Placeholder text to be continued.'],
-    onComplete,
-    hideGameOnStart: true,
-    hideMenuOnStart: true,
-    showGameOnComplete: true,
-    showMenuOnComplete: true,
-    hideContainerOnComplete: true,
-  });
-}
-
-function runSceneTransitionSequence({ onComplete } = {}) {
-  playPauseableTextSequence({
-    sentences: ['A moment later'],
-    onComplete,
-    hideGameOnStart: true,
-    hideMenuOnStart: true,
-    showGameOnComplete: false,
-    showMenuOnComplete: false,
-    hideContainerOnComplete: false,
-  });
-}
-
-function schedulePostDesertSequence(delay = 0) {
-  if (postDesertSequenceScheduled) {
-    return;
-  }
-
-  postDesertSequenceScheduled = true;
-
-  if (postDesertSequenceTimeoutId) {
-    window.clearTimeout(postDesertSequenceTimeoutId);
-  }
-
-  const safeDelay = Math.max(0, Number(delay) || 0);
-
-  postDesertSequenceTimeoutId = window.setTimeout(() => {
-    postDesertSequenceTimeoutId = null;
-    hideAllDialogues();
-    runSceneTransitionSequence({
-      onComplete: () => {
-        document.dispatchEvent(
-          new CustomEvent('scene:transitioned', {
-            detail: { name: 'post-desert' },
-          }),
-        );
-      },
-    });
-  }, safeDelay);
 }
 
 runIntroSequence(() => {
