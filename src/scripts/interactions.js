@@ -226,7 +226,20 @@ export function runInteraction({ verb, target, context }) {
 
   const outcome = typeof result === 'string' ? { dialogueKey: result } : result;
   if (outcome.dialogueKey && interaction.dialogues?.[outcome.dialogueKey]) {
-    playDialogue(context, interaction.dialogues[outcome.dialogueKey], outcome);
+    const dialogueConfig = interaction.dialogues[outcome.dialogueKey];
+    const duration = outcome.duration || dialogueConfig.duration || 3500;
+    const durationMs = Number(duration) || 0;
+
+    playDialogue(context, dialogueConfig, outcome);
+
+    if (
+      interaction.verb === 'talk' &&
+      interaction.target === 'bedouins' &&
+      outcome.dialogueKey === 'gratitude' &&
+      context.transitions?.schedulePostDesertSequence
+    ) {
+      context.transitions.schedulePostDesertSequence(durationMs + 500);
+    }
   }
 
   return true;

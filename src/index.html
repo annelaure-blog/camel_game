@@ -6,7 +6,11 @@
   <link rel="stylesheet" href="styles/main.css">
 </head>
 <body>
-  <div id="game">
+  <div id="intro-sequence" class="intro-sequence">
+    <div class="intro-sequence__text" id="intro-text"></div>
+    <div class="intro-sequence__instructions" id="intro-instructions">Press space to pause</div>
+  </div>
+  <div id="game" class="is-hidden">
     <div class="ambient" data-ambient="dunes-west-1">dunes</div>
     <div class="ambient" data-ambient="dunes-west-2">more dunes</div>
     <div class="ambient" data-ambient="dunes-mid-1">dunes</div>
@@ -19,7 +23,7 @@
 
     <div class="label" data-name="palm tree">palm tree</div>
     <div class="label" data-name="carpet">carpet</div>
-    <div class="label" data-name="bedouins">BEDOUINS-GROUP</div>
+    <div class="label" data-name="bedouins">BEDOUINS</div>
     <div class="label" data-name="camel">camel</div>
     <div class="label" data-name="pond">pond</div>
     <div class="label" data-name="bucket">bucket</div>
@@ -28,7 +32,7 @@
     <div class="dialogue-box dialogue-other" id="dialogue-bedouins"></div>
     <div class="dialogue-box dialogue-camel" id="dialogue-camel"></div>
   </div>
-  <div id="menu">
+  <div id="menu" class="is-hidden">
     <div id="inventory">Inventory: <span id="inventory-items"></span></div>
     <div id="verbs">
       <div class="verb" data-verb="talk">TALK TO</div>
