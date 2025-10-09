@@ -21,6 +21,15 @@ const bucket = document.querySelector('[data-name="bucket"]');
 const palmTree = document.querySelector('[data-name="palm tree"]');
 const pond = document.querySelector('[data-name="pond"]');
 const gameElement = document.getElementById('game');
+const menuElement = document.getElementById('menu');
+
+const introSequenceElement = document.getElementById('intro-sequence');
+const introTextElement = document.getElementById('intro-text');
+const introInstructionsElement = document.getElementById('intro-instructions');
+
+let activeSequenceController = null;
+let postDesertSequenceScheduled = false;
+let postDesertSequenceTimeoutId = null;
 
 renderSceneLayout(gameElement);
 
@@ -29,6 +38,12 @@ const dialogueUI = new DialogueUI({
   actorElements,
   gameElement,
 });
+
+function hideAllDialogues() {
+  Object.keys(dialogueElements).forEach((speaker) => {
+    dialogueUI.hide(speaker);
+  });
+}
 
 const inventoryDisplay = document.getElementById('inventory-items');
 const inventory = new Inventory({ displayElement: inventoryDisplay });
@@ -47,6 +62,9 @@ const context = {
   ui: dialogueUI,
   getText,
   worldEvents: null,
+  transitions: {
+    schedulePostDesertSequence,
+  },
   elements: {
     game: gameElement,
     bucket,
@@ -107,12 +125,6 @@ function setupInitialGreeting() {
   }
 
   let greetingShown = false;
-
-  const hideAllDialogues = () => {
-    Object.keys(dialogueElements).forEach((speaker) => {
-      dialogueUI.hide(speaker);
-    });
-  };
 
   const playInitialSequence = () => {
     if (greetingShown) {
@@ -177,4 +189,230 @@ function setupInitialGreeting() {
   }, 6500);
 }
 
-initializeGame();
+function playPauseableTextSequence({
+  sentences,
+  onComplete,
+  hideGameOnStart = false,
+  hideMenuOnStart = false,
+  showGameOnComplete = false,
+  showMenuOnComplete = false,
+  hideContainerOnComplete = true,
+  sentenceDuration = 3000,
+} = {}) {
+  if (!introSequenceElement || !introTextElement || !introInstructionsElement) {
+    if (typeof onComplete === 'function') {
+      onComplete();
+    }
+    return;
+  }
+
+  const normalizedSentences = Array.isArray(sentences)
+    ? sentences.filter((sentence) => Boolean(sentence))
+    : [sentences].filter((sentence) => Boolean(sentence));
+
+  if (normalizedSentences.length === 0) {
+    if (typeof onComplete === 'function') {
+      onComplete();
+    }
+    return;
+  }
+
+  if (activeSequenceController?.teardown) {
+    activeSequenceController.teardown({ skipCallbacks: true });
+  }
+
+  if (hideGameOnStart && gameElement) {
+    gameElement.classList.add('is-hidden');
+  }
+
+  if (hideMenuOnStart && menuElement) {
+    menuElement.classList.add('is-hidden');
+  }
+
+  hideAllDialogues();
+
+  const state = {
+    currentIndex: 0,
+    timerId: null,
+    isPaused: false,
+    remainingTime: sentenceDuration,
+    lastTick: 0,
+  };
+
+  const updateInstructions = () => {
+    introInstructionsElement.textContent = state.isPaused
+      ? 'Press space to resume'
+      : 'Press space to pause';
+  };
+
+  const clearTimer = () => {
+    if (state.timerId !== null) {
+      window.clearTimeout(state.timerId);
+      state.timerId = null;
+    }
+  };
+
+  function handleSpaceToggle(event) {
+    if (event.code !== 'Space') {
+      return;
+    }
+
+    event.preventDefault();
+
+    if (state.isPaused) {
+      resumeSequence();
+    } else {
+      pauseSequence();
+    }
+  }
+
+  let controller = null;
+
+  const finalize = ({ skipCallbacks = false } = {}) => {
+    clearTimer();
+    document.removeEventListener('keydown', handleSpaceToggle);
+
+    introTextElement.textContent = '';
+    introInstructionsElement.textContent = '';
+
+    if (hideContainerOnComplete) {
+      introSequenceElement.classList.add('is-hidden');
+    }
+
+    if (showGameOnComplete && gameElement) {
+      gameElement.classList.remove('is-hidden');
+    }
+
+    if (showMenuOnComplete && menuElement) {
+      menuElement.classList.remove('is-hidden');
+    }
+
+    if (activeSequenceController === controller) {
+      activeSequenceController = null;
+    }
+
+    if (!skipCallbacks && typeof onComplete === 'function') {
+      onComplete();
+    }
+  };
+
+  const showSentence = () => {
+    if (state.currentIndex >= normalizedSentences.length) {
+      finalize();
+      return;
+    }
+
+    introSequenceElement.classList.remove('is-hidden');
+    introTextElement.textContent = normalizedSentences[state.currentIndex];
+    state.isPaused = false;
+    state.remainingTime = sentenceDuration;
+    state.lastTick = Date.now();
+    updateInstructions();
+
+    state.timerId = window.setTimeout(() => {
+      state.currentIndex += 1;
+      showSentence();
+    }, sentenceDuration);
+  };
+
+  const pauseSequence = () => {
+    if (state.isPaused) {
+      return;
+    }
+
+    const now = Date.now();
+    state.remainingTime = Math.max(0, state.remainingTime - (now - state.lastTick));
+    clearTimer();
+    state.isPaused = true;
+    updateInstructions();
+  };
+
+  const resumeSequence = () => {
+    if (!state.isPaused) {
+      return;
+    }
+
+    state.isPaused = false;
+    updateInstructions();
+
+    if (state.remainingTime <= 0) {
+      state.currentIndex += 1;
+      showSentence();
+      return;
+    }
+
+    state.lastTick = Date.now();
+    state.timerId = window.setTimeout(() => {
+      state.currentIndex += 1;
+      showSentence();
+    }, state.remainingTime);
+  };
+
+  controller = {
+    teardown: ({ skipCallbacks = false } = {}) => {
+      finalize({ skipCallbacks });
+    },
+  };
+
+  activeSequenceController = controller;
+
+  document.addEventListener('keydown', handleSpaceToggle);
+
+  showSentence();
+}
+
+function runIntroSequence(onComplete) {
+  playPauseableTextSequence({
+    sentences: ['Once upon a time,...', 'Placeholder text to be continued.'],
+    onComplete,
+    hideGameOnStart: true,
+    hideMenuOnStart: true,
+    showGameOnComplete: true,
+    showMenuOnComplete: true,
+    hideContainerOnComplete: true,
+  });
+}
+
+function runSceneTransitionSequence({ onComplete } = {}) {
+  playPauseableTextSequence({
+    sentences: ['A moment later'],
+    onComplete,
+    hideGameOnStart: true,
+    hideMenuOnStart: true,
+    showGameOnComplete: false,
+    showMenuOnComplete: false,
+    hideContainerOnComplete: false,
+  });
+}
+
+function schedulePostDesertSequence(delay = 0) {
+  if (postDesertSequenceScheduled) {
+    return;
+  }
+
+  postDesertSequenceScheduled = true;
+
+  if (postDesertSequenceTimeoutId) {
+    window.clearTimeout(postDesertSequenceTimeoutId);
+  }
+
+  const safeDelay = Math.max(0, Number(delay) || 0);
+
+  postDesertSequenceTimeoutId = window.setTimeout(() => {
+    postDesertSequenceTimeoutId = null;
+    hideAllDialogues();
+    runSceneTransitionSequence({
+      onComplete: () => {
+        document.dispatchEvent(
+          new CustomEvent('scene:transitioned', {
+            detail: { name: 'post-desert' },
+          }),
+        );
+      },
+    });
+  }, safeDelay);
+}
+
+runIntroSequence(() => {
+  initializeGame();
+});
