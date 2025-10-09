@@ -81,6 +81,8 @@ body {
   font-size: calc(var(--ambient-font-base) * var(--font-scale, 1));
   top: calc(var(--pos-y, 0) * 100%);
   left: calc(var(--pos-x, 0) * 100%);
+  transform: translate(-50%, -50%);
+  transform-origin: center;
   padding: 0.25rem 0.4rem;
   box-sizing: border-box;
   overflow-wrap: anywhere;
@@ -103,6 +105,8 @@ body {
   font-size: calc(var(--label-font-base) * var(--font-scale, 1));
   top: calc(var(--pos-y, 0) * 100%);
   left: calc(var(--pos-x, 0) * 100%);
+  transform: translate(-50%, -50%);
+  transform-origin: center;
   width: var(--size-width, max-content);
   height: var(--size-height, max-content);
   z-index: var(--layer, 2);
@@ -133,7 +137,7 @@ body {
   left: 40%;
   animation: dashPath 6s ease-in-out forwards;
   z-index: 3;
-  transform: scale(0.3);
+  transform: translate(-50%, -50%) scale(0.3);
   transform-origin: center bottom;
 }
 
@@ -155,25 +159,25 @@ body {
   0% {
     left: 40%;
     top: 5%;
-    transform: scale(0.3);
+    transform: translate(-50%, -50%) scale(0.3);
   }
 
   25% {
     left: 48%;
     top: 20%;
-    transform: scale(0.4);
+    transform: translate(-50%, -50%) scale(0.4);
   }
 
   50% {
     left: 55%;
     top: 40%;
-    transform: scale(0.6);
+    transform: translate(-50%, -50%) scale(0.6);
   }
 
   100% {
     left: 62%;
     top: 56%;
-    transform: scale(0.8);
+    transform: translate(-50%, -50%) scale(0.8);
   }
 }
 
