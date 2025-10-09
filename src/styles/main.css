@@ -59,6 +59,12 @@ body {
   --label-font-base: clamp(0.85rem, 0.85vw + 0.4rem, 1.8rem);
 }
 
+#scene-root {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
 #menu {
   width: 100%;
   display: flex;
