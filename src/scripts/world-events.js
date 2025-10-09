@@ -36,6 +36,10 @@ export class WorldEvents {
     this.receivedDates = true;
   }
 
+  setPalmTreeElement(element) {
+    this.palmTreeElement = element ?? null;
+  }
+
   shakePalmTree() {
     if (!this.palmTreeElement) {
       return;

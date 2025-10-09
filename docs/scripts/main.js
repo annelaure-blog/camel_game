@@ -3,6 +3,8 @@ import { DialogueUI } from './ui.js';
 import { runInteraction } from './interactions.js';
 import { WorldEvents } from './world-events.js';
 import { renderSceneLayout } from './layout.js';
+import { createSceneElements } from './scene-dom.js';
+import { scenes } from './scenes/index.js';
 import { getText } from './texts.js';
 import { playPauseableTextSequence, skipActiveSequence } from './sequences.js';
 
@@ -12,17 +14,79 @@ const dialogueElements = {
   camel: document.getElementById('dialogue-camel'),
 };
 
+const gameElement = document.getElementById('game');
+const sceneRootElement = document.getElementById('scene-root');
+const menuElement = document.getElementById('menu');
+
 const actorElements = {
-  me: document.querySelector('[data-name="me"]'),
-  bedouins: document.querySelector('[data-name="bedouins"]'),
-  camel: document.querySelector('[data-name="camel"]'),
+  me: null,
+  bedouins: null,
+  camel: null,
 };
 
-const bucket = document.querySelector('[data-name="bucket"]');
-const palmTree = document.querySelector('[data-name="palm tree"]');
-const pond = document.querySelector('[data-name="pond"]');
-const gameElement = document.getElementById('game');
-const menuElement = document.getElementById('menu');
+const sceneState = {
+  name: null,
+  config: null,
+  elements: {
+    ambientElements: {},
+    labelElements: {},
+  },
+};
+
+const sceneContextElements = {
+  game: gameElement,
+  bucket: null,
+  pond: null,
+  palmTree: null,
+  me: null,
+  bedouins: null,
+  camel: null,
+};
+
+let worldEvents = null;
+
+function updateSceneElementReferences() {
+  const labels = sceneState.elements.labelElements ?? {};
+
+  actorElements.me = labels.me ?? null;
+  actorElements.bedouins = labels.bedouins ?? null;
+  actorElements.camel = labels.camel ?? null;
+
+  sceneContextElements.bucket = labels.bucket ?? null;
+  sceneContextElements.pond = labels.pond ?? null;
+  sceneContextElements.palmTree = labels['palm tree'] ?? null;
+  sceneContextElements.me = actorElements.me;
+  sceneContextElements.bedouins = actorElements.bedouins;
+  sceneContextElements.camel = actorElements.camel;
+}
+
+function loadScene(name) {
+  const scene = scenes[name];
+  if (!scene || !sceneRootElement) {
+    return null;
+  }
+
+  sceneState.name = name;
+  sceneState.config = scene;
+  sceneState.elements = createSceneElements({ scene, container: sceneRootElement });
+
+  renderSceneLayout(gameElement, scene);
+  updateSceneElementReferences();
+
+  if (worldEvents && typeof worldEvents.setPalmTreeElement === 'function') {
+    worldEvents.setPalmTreeElement(sceneContextElements.palmTree);
+  }
+
+  if (typeof document !== 'undefined') {
+    document.dispatchEvent(
+      new CustomEvent('scene:loaded', {
+        detail: { name },
+      }),
+    );
+  }
+
+  return scene;
+}
 
 const introSequenceElement = document.getElementById('intro-sequence');
 const introTextElement = document.getElementById('intro-text');
@@ -31,7 +95,7 @@ let postDesertSequenceScheduled = false;
 let postDesertSequenceTimeoutId = null;
 let postDesertSequenceStarted = false;
 
-renderSceneLayout(gameElement);
+loadScene('desert');
 
 const dialogueUI = new DialogueUI({
   dialogueElements,
@@ -50,7 +114,6 @@ const inventory = new Inventory({ displayElement: inventoryDisplay });
 
 let selectedVerb = null;
 const verbs = document.querySelectorAll('.verb');
-const labels = document.querySelectorAll('.label');
 
 const clearSelectedVerb = () => {
   selectedVerb = null;
@@ -65,15 +128,7 @@ const context = {
   transitions: {
     schedulePostDesertSequence,
   },
-  elements: {
-    game: gameElement,
-    bucket,
-    pond,
-    palmTree,
-    me: actorElements.me,
-    bedouins: actorElements.bedouins,
-    camel: actorElements.camel,
-  },
+  elements: sceneContextElements,
 };
 
 const handleInteraction = (verb, target) => {
@@ -86,9 +141,9 @@ const handleInteraction = (verb, target) => {
   }
 };
 
-const worldEvents = new WorldEvents({
+worldEvents = new WorldEvents({
   gameElement,
-  palmTreeElement: palmTree,
+  palmTreeElement: sceneContextElements.palmTree,
   getSelectedVerb: () => selectedVerb,
   onInteraction: ({ verb, target }) => handleInteraction(verb, target),
 });
@@ -103,15 +158,22 @@ verbs.forEach((verbElement) => {
   });
 });
 
-labels.forEach((label) => {
-  label.addEventListener('click', () => {
+if (sceneRootElement) {
+  sceneRootElement.addEventListener('click', (event) => {
+    const label = event.target.closest('.label');
+    if (!label || !sceneRootElement.contains(label)) {
+      return;
+    }
     if (!selectedVerb) {
       return;
     }
     const name = label.dataset.name;
+    if (!name) {
+      return;
+    }
     handleInteraction(selectedVerb, name);
   });
-});
+}
 
 function initializeGame() {
   inventory.render();
@@ -328,6 +390,19 @@ function handleSkipKey(event) {
 
   forcePostDesertSequence();
 }
+
+document.addEventListener('scene:transitioned', (event) => {
+  const name = event?.detail?.name;
+  if (name !== 'post-desert') {
+    return;
+  }
+
+  loadScene('tea');
+  hideAllDialogues();
+  clearSelectedVerb();
+  gameElement.classList.remove('is-hidden');
+  menuElement.classList.remove('is-hidden');
+});
 
 runIntroSequence(() => {
   initializeGame();
