@@ -4,7 +4,7 @@
   "description": "Cardboard desert scene served from src directory",
   "scripts": {
     "start": "npx serve src",
-    "build": "rm -rf dist && cp -r src dist",
+    "build": "rm -rf docs && mkdir -p docs && cp -r src/. docs",
     "test": "vitest"
   },
   "author": "",
