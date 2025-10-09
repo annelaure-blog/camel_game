@@ -4,6 +4,7 @@ import { runInteraction } from './interactions.js';
 import { WorldEvents } from './world-events.js';
 import { renderSceneLayout } from './layout.js';
 import { getText } from './texts.js';
+import { playPauseableTextSequence } from './sequences.js';
 
 const dialogueElements = {
   me: document.getElementById('dialogue-me'),
@@ -26,6 +27,8 @@ const menuElement = document.getElementById('menu');
 const introSequenceElement = document.getElementById('intro-sequence');
 const introTextElement = document.getElementById('intro-text');
 const introInstructionsElement = document.getElementById('intro-instructions');
+let postDesertSequenceScheduled = false;
+let postDesertSequenceTimeoutId = null;
 
 renderSceneLayout(gameElement);
 
@@ -186,6 +189,71 @@ function setupInitialGreeting() {
 }
 
 function runIntroSequence(onComplete) {
+  hideAllDialogues();
+  playPauseableTextSequence({
+    sentences: ['Once upon a time,...', 'Placeholder text to be continued.'],
+    onComplete,
+    hideGameOnStart: true,
+    hideMenuOnStart: true,
+    showGameOnComplete: true,
+    showMenuOnComplete: true,
+    hideContainerOnComplete: true,
+    elements: {
+      container: introSequenceElement,
+      text: introTextElement,
+      instructions: introInstructionsElement,
+      game: gameElement,
+      menu: menuElement,
+    },
+  });
+}
+
+function runSceneTransitionSequence({ onComplete } = {}) {
+  hideAllDialogues();
+  playPauseableTextSequence({
+    sentences: ['A moment later'],
+    onComplete,
+    hideGameOnStart: true,
+    hideMenuOnStart: true,
+    showGameOnComplete: false,
+    showMenuOnComplete: false,
+    hideContainerOnComplete: false,
+    elements: {
+      container: introSequenceElement,
+      text: introTextElement,
+      instructions: introInstructionsElement,
+      game: gameElement,
+      menu: menuElement,
+    },
+  });
+}
+
+function schedulePostDesertSequence(delay = 0) {
+  if (postDesertSequenceScheduled) {
+    return;
+  }
+
+  postDesertSequenceScheduled = true;
+
+  if (postDesertSequenceTimeoutId) {
+    window.clearTimeout(postDesertSequenceTimeoutId);
+  }
+
+  const safeDelay = Math.max(0, Number(delay) || 0);
+
+  postDesertSequenceTimeoutId = window.setTimeout(() => {
+    postDesertSequenceTimeoutId = null;
+    hideAllDialogues();
+    runSceneTransitionSequence({
+      onComplete: () => {
+        document.dispatchEvent(
+          new CustomEvent('scene:transitioned', {
+            detail: { name: 'post-desert' },
+          }),
+        );
+      },
+    });
+  }, safeDelay);
   if (!introSequenceElement || !introTextElement || !introInstructionsElement) {
     if (typeof onComplete === 'function') {
       onComplete();
