@@ -1,3 +1,7 @@
+:root {
+  --app-gutter: clamp(0.75rem, 2vw, 1.75rem);
+}
+
 body {
   margin: 0;
   font-family: 'Courier New', monospace;
@@ -8,7 +12,7 @@ body {
   flex-direction: column;
   align-items: center;
   gap: clamp(0.75rem, 2vw, 1.5rem);
-  padding: clamp(0.75rem, 2vw, 1.75rem);
+  padding: var(--app-gutter);
   box-sizing: border-box;
 }
 
@@ -51,8 +55,7 @@ body {
 #game {
   position: relative;
   flex: 0 0 auto;
-  width: 100%;
-  max-width: 960px;
+  width: min(100%, calc(100vw - var(--app-gutter) * 2));
   min-height: 0;
   background: #c4b59a;
   overflow: hidden;
@@ -78,8 +81,7 @@ body {
 }
 
 #menu {
-  width: 100%;
-  max-width: 960px;
+  width: min(100%, calc(100vw - var(--app-gutter) * 2));
   display: flex;
   flex-direction: column;
   flex: 0 0 auto;
@@ -265,7 +267,9 @@ body {
 
 #verbs {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(120px, max-content));
+  justify-content: center;
+  justify-items: center;
   align-items: stretch;
   background: #f1e7d0;
   padding: clamp(0.5rem, 1vw, 0.75rem) clamp(0.75rem, 2vw, 1.5rem) clamp(0.75rem, 2vw, 1.5rem);
@@ -273,6 +277,8 @@ body {
   font-size: clamp(0.95rem, 0.7vw + 0.55rem, 1.1rem);
   position: relative;
   border-bottom: 2px solid #000;
+  width: min(100%, 650px);
+  margin: 0 auto;
 }
 
 .verb {
