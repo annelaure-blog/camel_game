@@ -6,12 +6,12 @@ body {
   margin: 0;
   font-family: 'Courier New', monospace;
   background: #c4b59a;
-  overflow-x: hidden;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: clamp(0.75rem, 2vw, 1.5rem);
+  height: 100vh;
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  align-items: stretch;
+  row-gap: clamp(0.75rem, 2vw, 1.5rem);
   padding: var(--app-gutter);
   box-sizing: border-box;
 }
@@ -55,11 +55,11 @@ body {
 #game {
   position: relative;
   flex: 0 0 auto;
-  width: min(100%, calc(100vw - var(--app-gutter) * 2));
+  width: 100%;
   min-height: 0;
   background: #c4b59a;
-  overflow: hidden;
-  margin: 0 auto;
+  overflow: visible;
+  margin: 0;
   padding: clamp(1.25rem, 2.5vw, 2.75rem) clamp(1rem, 2vw, 2rem) clamp(0.75rem, 1.5vw, 1.75rem);
   box-sizing: border-box;
   display: flex;
@@ -69,7 +69,7 @@ body {
   --scene-height: 100%;
   --ambient-font-base: clamp(0.9rem, 1vw + 0.3rem, 1.4rem);
   --label-font-base: clamp(0.85rem, 0.85vw + 0.4rem, 1.8rem);
-  --scene-offset-y: 0.12;
+  --scene-offset-y: 0.18;
 }
 
 #scene-root {
@@ -81,13 +81,14 @@ body {
 }
 
 #menu {
-  width: min(100%, calc(100vw - var(--app-gutter) * 2));
+  width: 100%;
   display: flex;
   flex-direction: column;
   flex: 0 0 auto;
-  margin: 0 auto;
+  margin: 0;
   box-sizing: border-box;
-  gap: clamp(0.5rem, 1.5vw, 0.9rem);
+  gap: 0;
+  align-items: stretch;
 }
 
 .ambient {
@@ -248,9 +249,8 @@ body {
 
 #inventory,
 #verbs {
-  width: 100%;
-  margin: 0;
-  border-top: 2px solid #000;
+  width: calc(100% + var(--app-gutter) * 2);
+  margin: 0 calc(-1 * var(--app-gutter));
   box-sizing: border-box;
   overflow-wrap: anywhere;
 }
@@ -260,25 +260,25 @@ body {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.75rem 1rem;
+  padding: 0.75rem calc(var(--app-gutter) + 0.25rem);
   font-size: clamp(0.85rem, 0.5vw + 0.65rem, 1.05rem);
-  margin-top: auto;
+  border: 2px solid #000;
+  border-bottom: 0;
 }
 
 #verbs {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, max-content));
+  display: flex;
+  flex-wrap: nowrap;
   justify-content: center;
-  justify-items: center;
-  align-items: stretch;
+  align-items: center;
   background: #f1e7d0;
-  padding: clamp(0.5rem, 1vw, 0.75rem) clamp(0.75rem, 2vw, 1.5rem) clamp(0.75rem, 2vw, 1.5rem);
+  padding: clamp(0.5rem, 1vw, 0.75rem) calc(var(--app-gutter) + 0.5rem)
+    clamp(0.75rem, 2vw, 1.5rem);
   gap: clamp(0.5rem, 1.4vw, 0.85rem);
   font-size: clamp(0.95rem, 0.7vw + 0.55rem, 1.1rem);
   position: relative;
-  border-bottom: 2px solid #000;
-  width: min(100%, 650px);
-  margin: 0 auto;
+  border: 2px solid #000;
+  margin-top: -2px;
 }
 
 .verb {
@@ -290,6 +290,7 @@ body {
   box-sizing: border-box;
   overflow-wrap: anywhere;
   text-align: center;
+  white-space: nowrap;
 }
 
 .verb.active {
