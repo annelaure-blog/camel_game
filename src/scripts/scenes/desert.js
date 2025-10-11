@@ -15,7 +15,7 @@ const desertScene = {
     'palm tree': {
       text: 'palm tree',
       position: {
-        default: { x: 0.08, y: 0.32 },
+        default: { x: 0.08, y: 0.36 },
       },
       size: {
         width: '150px',
@@ -26,7 +26,7 @@ const desertScene = {
     },
     carpet: {
       text: 'carpet',
-      position: { default: { x: 0.24, y: 0.58 } },
+      position: { default: { x: 0.3, y: 0.63 } },
       size: {
         width: '350px',
         height: '250px',
@@ -46,7 +46,7 @@ const desertScene = {
     },
     camel: {
       text: 'camel',
-      position: { default: { x: 0.63, y: 0.39 } },
+      position: { default: { x: 0.59, y: 0.39 } },
       size: {
         width: '150px',
         height: '100px',
@@ -59,14 +59,14 @@ const desertScene = {
       position: { default: { x: 0.75, y: 0.42 } },
       size: {
         width: '250px',
-        height: '100px',
+        height: '140px',
       },
       fontScale: { default: 1.4 },
       layer: 2,
     },
     bucket: {
       text: 'bucket',
-      position: { default: { x: 0.84, y: 0.32 } },
+      position: { default: { x: 0.81, y: 0.32 } },
       size: {
         width: '80px',
         height: '50px',
