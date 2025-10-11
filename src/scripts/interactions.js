@@ -1,6 +1,7 @@
+import { getBuilderRuntimeData } from './builder/runtime.js';
 import { getText } from './texts.js';
 
-export const interactions = [
+const baseInteractions = [
   {
     verb: 'talk',
     target: 'bedouins',
@@ -184,6 +185,11 @@ export const interactions = [
   },
 ];
 
+const builderData = getBuilderRuntimeData();
+const builderInteractions = Array.isArray(builderData.interactions) ? builderData.interactions : [];
+
+export const interactions = [...baseInteractions, ...builderInteractions];
+
 function playDialogue(context, config, overrides = {}) {
   if (!context.ui || !config) {
     return;
@@ -203,7 +209,17 @@ function playDialogue(context, config, overrides = {}) {
 }
 
 export function runInteraction({ verb, target, context }) {
-  const interaction = interactions.find((entry) => entry.verb === verb && entry.target === target);
+  const activeSceneName =
+    (context && typeof context.getSceneName === 'function' && context.getSceneName()) ||
+    (context && context.scene && context.scene.name) ||
+    null;
+
+  const interaction = interactions.find((entry) => {
+    if (entry.scene && activeSceneName && entry.scene !== activeSceneName) {
+      return false;
+    }
+    return entry.verb === verb && entry.target === target;
+  });
   if (!interaction) {
     return false;
   }
