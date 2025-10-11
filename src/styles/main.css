@@ -69,7 +69,7 @@ body {
   --scene-height: 100%;
   --ambient-font-base: clamp(0.9rem, 1vw + 0.3rem, 1.4rem);
   --label-font-base: clamp(0.85rem, 0.85vw + 0.4rem, 1.8rem);
-  --scene-offset-y: 0.24;
+  --scene-offset-y: 0.18;
 }
 
 #scene-root {
@@ -249,7 +249,8 @@ body {
 
 #inventory,
 #verbs {
-  width: 100%;
+  width: calc(100% + var(--app-gutter) * 2);
+  margin: 0 calc(-1 * var(--app-gutter));
   box-sizing: border-box;
   overflow-wrap: anywhere;
 }
@@ -276,7 +277,9 @@ body {
   gap: clamp(0.5rem, 1.4vw, 0.85rem);
   font-size: clamp(0.95rem, 0.7vw + 0.55rem, 1.1rem);
   position: relative;
-  border: 2px solid #000;
+  border-bottom: 2px solid #000;
+  width: 100%;
+  margin: 0;
 }
 
 .verb {
