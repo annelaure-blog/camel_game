@@ -17,6 +17,10 @@
     <div class="dialogue-box dialogue-camel" id="dialogue-camel"></div>
   </div>
   <div id="menu" class="is-hidden">
+    <div class="menu-toolbar">
+      <label for="scene-selector" class="menu-toolbar__label">Scene</label>
+      <select id="scene-selector" class="menu-toolbar__select"></select>
+    </div>
     <div id="inventory">Inventory: <span id="inventory-items"></span></div>
     <div id="verbs">
       <div class="verb" data-verb="talk">TALK TO</div>
@@ -27,6 +31,7 @@
       <div class="verb-toolbar__hint" id="verb-skip-hint">press SPACE to skip</div>
     </div>
   </div>
-  <script type="module" src="scripts/main.js"></script>
+  <div id="builder-root" class="is-hidden"></div>
+  <script type="module" src="scripts/app.js"></script>
 </body>
 </html>

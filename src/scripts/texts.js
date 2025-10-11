@@ -1,4 +1,6 @@
-export const TEXTS = {
+import { getBuilderRuntimeData } from './builder/runtime.js';
+
+const DEFAULT_TEXTS = {
   camel: {},
   me: {
     initialObservation: 'The desert is quiet.',
@@ -56,6 +58,38 @@ export const TEXTS = {
     },
   },
 };
+
+function deepMerge(target, source) {
+  if (!source || typeof source !== 'object') {
+    return target;
+  }
+
+  const output = { ...target };
+
+  Object.keys(source).forEach((key) => {
+    const sourceValue = source[key];
+    const targetValue = output[key];
+
+    if (Array.isArray(sourceValue)) {
+      output[key] = sourceValue.slice();
+      return;
+    }
+
+    if (sourceValue && typeof sourceValue === 'object') {
+      output[key] = deepMerge(targetValue && typeof targetValue === 'object' ? targetValue : {}, sourceValue);
+      return;
+    }
+
+    output[key] = sourceValue;
+  });
+
+  return output;
+}
+
+const builderData = getBuilderRuntimeData();
+const TEXTS = deepMerge(DEFAULT_TEXTS, builderData.texts || {});
+
+export { TEXTS };
 
 export function getText(path) {
   const value = path

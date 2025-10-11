@@ -4,7 +4,7 @@ import { runInteraction } from './interactions.js';
 import { WorldEvents } from './world-events.js';
 import { renderSceneLayout } from './layout.js';
 import { createSceneElements } from './scene-dom.js';
-import { scenes } from './scenes/index.js';
+import { scenes, sceneOrder, initialSceneName } from './scenes/index.js';
 import { getText } from './texts.js';
 import { playPauseableTextSequence, skipActiveSequence } from './sequences.js';
 
@@ -17,6 +17,7 @@ const dialogueElements = {
 const gameElement = document.getElementById('game');
 const sceneRootElement = document.getElementById('scene-root');
 const menuElement = document.getElementById('menu');
+const sceneSelectorElement = document.getElementById('scene-selector');
 
 const actorElements = {
   me: null,
@@ -85,6 +86,10 @@ function loadScene(name) {
     );
   }
 
+  if (sceneSelectorElement) {
+    sceneSelectorElement.value = name;
+  }
+
   return scene;
 }
 
@@ -123,7 +128,61 @@ const unlockInteractions = () => {
   }
 };
 
-loadScene('desert');
+loadScene(initialSceneName || 'desert');
+
+function getAvailableScenes() {
+  return sceneOrder && sceneOrder.length ? sceneOrder : Object.keys(scenes);
+}
+
+function getNextSceneName(current) {
+  const availableScenes = getAvailableScenes();
+  if (!availableScenes.length) {
+    return null;
+  }
+
+  const index = availableScenes.indexOf(current);
+  if (index >= 0 && index < availableScenes.length - 1) {
+    const candidate = availableScenes[index + 1];
+    return scenes[candidate] ? candidate : null;
+  }
+
+  return null;
+}
+
+function populateSceneSelector() {
+  if (!sceneSelectorElement) {
+    return;
+  }
+
+  sceneSelectorElement.innerHTML = '';
+
+  const availableScenes = getAvailableScenes();
+
+  availableScenes.forEach((sceneName) => {
+    if (!scenes[sceneName]) {
+      return;
+    }
+    const option = document.createElement('option');
+    option.value = sceneName;
+    option.textContent = sceneName;
+    sceneSelectorElement.appendChild(option);
+  });
+
+  if (sceneState.name) {
+    sceneSelectorElement.value = sceneState.name;
+  }
+}
+
+populateSceneSelector();
+
+if (sceneSelectorElement) {
+  sceneSelectorElement.addEventListener('change', (event) => {
+    const nextScene = event.target.value;
+    if (nextScene && scenes[nextScene]) {
+      loadScene(nextScene);
+    }
+  });
+}
 
 const dialogueUI = new DialogueUI({
   dialogueElements,
@@ -157,6 +216,8 @@ const context = {
     schedulePostDesertSequence,
   },
   elements: sceneContextElements,
+  scene: sceneState,
+  getSceneName: () => sceneState.name,
 };
 
 const handleInteraction = (verb, target) => {
@@ -484,7 +545,11 @@ document.addEventListener('scene:transitioned', (event) => {
   if (typeof cancelInitialGreetingSequence === 'function') {
     cancelInitialGreetingSequence();
   }
-  loadScene('tea');
+
+  const nextScene = getNextSceneName(sceneState.name || initialSceneName) || 'tea';
+  if (nextScene && scenes[nextScene]) {
+    loadScene(nextScene);
+  }
   hideAllDialogues();
   clearSelectedVerb();
   gameElement.classList.remove('is-hidden');
